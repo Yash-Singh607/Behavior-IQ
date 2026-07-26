@@ -8,13 +8,13 @@
 [![LightGBM](https://img.shields.io/badge/LightGBM-4.7+-2E7D32?style=for-the-badge&logo=lightgbm&logoColor=white)](https://lightgbm.readthedocs.io/)
 [![SHAP](https://img.shields.io/badge/SHAP-0.51+-7B1FA2?style=for-the-badge&logo=python&logoColor=white)](https://shap.readthedocs.io/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
-[![Vercel](https://img.shields.io/badge/Vercel-Live_Frontend-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://behavior-iq.vercel.app)
+[![Vercel](https://img.shields.io/badge/Vercel-Live_Frontend-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://behavior-iq-jade.vercel.app)
 [![Render](https://img.shields.io/badge/Render-Live_Backend-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://behavior-iq.onrender.com)
 
 <p align="center">
   <b>A Tier-1 Enterprise Security Operations Center (SOC) Engine powered by Unsupervised Isolation Forests, LightGBM Multi-Class Classification, SHAP Explainability, and Autonomous Mitigation Playbooks.</b>
   <br />
-  <a href="https://behavior-iq.vercel.app"><strong>Explore Live Dashboard »</strong></a>
+  <a href="https://behavior-iq-jade.vercel.app"><strong>Explore Live Dashboard »</strong></a>
   ·
   <a href="https://behavior-iq.onrender.com/docs"><strong>Interactive API Docs »</strong></a>
   ·
@@ -127,7 +127,7 @@ Access the application on port `8000`.
 
 ## 🌐 Live Cloud Deployment
 
-- 🎨 **Frontend Web Application (Vercel)**: [https://behavior-iq.vercel.app](https://behavior-iq.vercel.app)
+- 🎨 **Frontend Web Application (Vercel)**: [https://behavior-iq-jade.vercel.app](https://behavior-iq-jade.vercel.app)
 - ⚡ **FastAPI REST API Engine (Render)**: [https://behavior-iq.onrender.com](https://behavior-iq.onrender.com)
 - 📄 **Interactive Swagger API Documentation**: [https://behavior-iq.onrender.com/docs](https://behavior-iq.onrender.com/docs)
 
