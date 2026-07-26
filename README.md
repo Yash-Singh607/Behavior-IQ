@@ -11,14 +11,17 @@
 [![Vercel](https://img.shields.io/badge/Vercel-Live_Frontend-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://behavior-iq-jade.vercel.app)
 [![Render](https://img.shields.io/badge/Render-Live_Backend-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://behavior-iq.onrender.com)
 
+---
+
+### 🏆 Honeywell Idea Submission
+**A Tier-1 Enterprise Security Operations Center (SOC) Engine powered by Unsupervised Isolation Forests, LightGBM Multi-Class Classification, SHAP Explainability, and Autonomous Mitigation Playbooks.**
+
 <p align="center">
-  <b>A Tier-1 Enterprise Security Operations Center (SOC) Engine powered by Unsupervised Isolation Forests, LightGBM Multi-Class Classification, SHAP Explainability, and Autonomous Mitigation Playbooks.</b>
-  <br />
-  <a href="https://behavior-iq-jade.vercel.app"><strong>Explore Live Dashboard »</strong></a>
+  <a href="https://behavior-iq-jade.vercel.app"><strong>🎨 Explore Live Dashboard »</strong></a>
   ·
-  <a href="https://behavior-iq.onrender.com/docs"><strong>Interactive API Docs »</strong></a>
+  <a href="https://behavior-iq.onrender.com/docs"><strong>⚡ Interactive API Docs »</strong></a>
   ·
-  <a href="#-quick-start"><strong>Quick Start Guide »</strong></a>
+  <a href="https://github.com/Yash-Singh607/Behavior-IQ"><strong>📦 GitHub Repository »</strong></a>
 </p>
 
 ---
@@ -29,7 +32,19 @@
 
 **BehaviorIQ** is a next-generation autonomous threat detection system engineered to protect enterprise cloud environments, corporate networks, and Honeywell OT/edge infrastructure. By replacing static rule-based SIEM alerts with dynamic machine learning baselines, BehaviorIQ reduces analyst alert fatigue by **99%** while achieving **sub-millisecond (<0.8ms)** zero-day anomaly detection.
 
-### 🌟 Key Capabilities at a Glance
+### 🎯 Supported MITRE ATT&CK® Threat Vectors
+
+| Threat Vector | MITRE ATT&CK Technique | Detection Mechanism | Automated Remediation Playbook |
+| :--- | :--- | :--- | :--- |
+| **Impossible Travel** | `T1078` Valid Accounts | Physical velocity $> 840 \text{ km/h}$ between tokens | WAF IP Quarantine + Revoke OAuth Session Tokens |
+| **Credential Stuffing** | `T1110.004` Password Spraying | $\ge 10$ failed logins/5m + Dark Web leak match | Force Password Reset + Mandatory MFA |
+| **Brute Force** | `T1110` Brute Force | High-frequency auth gateway probes | Rate-Limit Origin IP + IP Blacklist |
+| **Lateral Movement** | `T1021` Remote Services | Unusual cross-subnet resource access | Isolate Machine Endpoint |
+| **Device Spoofing** | `T1036` Masquerading | Device fingerprint mismatch + TLS header anomaly | Challenge WebAuthn / FIDO2 Hardware Token |
+
+---
+
+## 🌟 Key Capabilities at a Glance
 
 - **⚡ Real-Time Ingestion Engine**: Processes **1,420+ events/sec** with stateful sliding-window feature extractions (geographic velocity $v > 840 \text{ km/h}$, failed login bursts).
 - **🌲 Dual-Stage ML Core**: Unsupervised **Isolation Forest** (5,000 decision trees) for novel anomaly detection paired with a multi-class **LightGBM** attack taxonomy classifier.
