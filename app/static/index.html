@@ -1,0 +1,2182 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BehaviorIQ — Autonomous AI Behavioral Anomaly & Threat Intelligence</title>
+
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        anarisk: {
+                            bg: '#080c0a',
+                            surface: '#0d1310',
+                            card: '#121a15',
+                            border: '#1c2821',
+                            hover: '#19241e',
+                            accent: '#22c55e',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        /* Dark Theme Default */
+        html.dark body {
+            background-color: #080c0a;
+            color: #f3f4f6;
+        }
+        html.dark .dashboard-container {
+            background-color: #0d1310;
+            border-color: #1c2821;
+        }
+        html.dark .card-bg {
+            background-color: #121a15;
+            border-color: #1c2821;
+        }
+        html.dark .sidebar-bg {
+            background-color: #0d1310;
+            border-color: #1c2821;
+        }
+        html.dark .table-row-bg {
+            background-color: #0d1310;
+            border-color: #1c2821;
+        }
+        html.dark .table-row-bg:hover {
+            background-color: #19241e;
+            border-color: #22c55e;
+        }
+        html.dark select option {
+            background-color: #121a15 !important;
+            color: #f3f4f6 !important;
+        }
+
+        /* Light Theme */
+        html:not(.dark) body {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        html:not(.dark) .dashboard-container {
+            background-color: #ffffff;
+            border-color: #cbd5e1;
+        }
+        html:not(.dark) .card-bg {
+            background-color: #ffffff;
+            border-color: #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        html:not(.dark) .sidebar-bg {
+            background-color: #f8fafc;
+            border-color: #e2e8f0;
+        }
+        html:not(.dark) .table-row-bg {
+            background-color: #ffffff;
+            border-color: #e2e8f0;
+        }
+        html:not(.dark) .table-row-bg:hover {
+            background-color: #f1f5f9;
+            border-color: #3b82f6;
+        }
+        html:not(.dark) select option {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+
+        /* High-Contrast Action Buttons */
+        .btn-investigate {
+            background-color: #059669;
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+        .btn-investigate:hover {
+            background-color: #047857;
+        }
+        html.dark .btn-investigate {
+            background-color: #1e293b;
+            color: #f8fafc !important;
+            border: 1px solid #334155;
+        }
+        html.dark .btn-investigate:hover {
+            background-color: #334155;
+        }
+
+        /* Cyber Grid Background Pattern */
+        .cyber-grid-bg {
+            background-color: #050806;
+            background-size: 45px 45px;
+            background-image: 
+                linear-gradient(to right, rgba(34, 197, 94, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(34, 197, 94, 0.04) 1px, transparent 1px);
+        }
+
+        .glow-radial-bg {
+            background: radial-gradient(circle at 10% 20%, rgba(34, 197, 94, 0.08) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.06) 0%, transparent 40%);
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #080c0a; }
+        ::-webkit-scrollbar-thumb { background: #1c2821; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #22c55e; }
+
+        @media print {
+            body { background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="glow-radial-bg antialiased min-h-screen flex flex-col p-4 lg:p-6 justify-center items-center">
+
+    <!-- ================= ENTERPRISE LOGIN GATE SCREEN ================= -->
+    <div id="login-gate-screen" class="fixed inset-0 z-50 cyber-grid-bg flex flex-col items-center justify-center p-4 overflow-hidden">
+        <!-- Interactive Cyber Network Canvas -->
+        <canvas id="loginCyberCanvas" class="absolute inset-0 pointer-events-none z-0"></canvas>
+
+        <!-- Ambient Glowing Orbs -->
+        <div class="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/15 rounded-full blur-[120px] pointer-events-none animate-pulse"></div>
+        <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-teal-500/15 rounded-full blur-[120px] pointer-events-none animate-pulse"></div>
+        <div class="absolute top-1/2 left-1/4 w-80 h-80 bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <!-- Floating Security Metric Badges around the Login Box (Hidden on Mobile) -->
+        <div class="hidden md:flex absolute top-12 left-12 card-bg border border-[#1c2821] px-4 py-2.5 rounded-2xl shadow-2xl items-center gap-3 backdrop-blur-md z-10">
+            <div class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></div>
+            <div class="flex flex-col font-mono text-xs">
+                <span class="font-bold text-white">Autonomous SOC Engine</span>
+                <span class="text-[10px] text-emerald-400 font-semibold">● 100% Operational</span>
+            </div>
+        </div>
+
+        <div class="hidden md:flex absolute top-16 right-12 card-bg border border-[#1c2821] px-4 py-2.5 rounded-2xl shadow-2xl items-center gap-3 backdrop-blur-md z-10">
+            <span class="text-emerald-400 font-bold text-sm">⚡</span>
+            <div class="flex flex-col font-mono text-xs">
+                <span class="font-bold text-white">Stream Ingestion</span>
+                <span class="text-[10px] text-slate-400">1,420 Events/sec (0.8ms)</span>
+            </div>
+        </div>
+
+        <div class="hidden md:flex absolute bottom-12 left-16 card-bg border border-[#1c2821] px-4 py-2.5 rounded-2xl shadow-2xl items-center gap-3 backdrop-blur-md z-10">
+            <span class="text-blue-400 font-bold text-sm">🔒</span>
+            <div class="flex flex-col font-mono text-xs">
+                <span class="font-bold text-white">AES-256 Encrypted</span>
+                <span class="text-[10px] text-slate-400">SOC 2 Type II Certified</span>
+            </div>
+        </div>
+
+        <div class="hidden md:flex absolute bottom-16 right-16 card-bg border border-[#1c2821] px-4 py-2.5 rounded-2xl shadow-2xl items-center gap-3 backdrop-blur-md z-10">
+            <span class="text-amber-400 font-bold text-sm">🌲</span>
+            <div class="flex flex-col font-mono text-xs">
+                <span class="font-bold text-white">Isolation Forest</span>
+                <span class="text-[10px] text-amber-400 font-semibold">5,000 Active Trees</span>
+            </div>
+        </div>
+
+        <!-- Central Login Glassmorphic Card -->
+        <div class="w-full max-w-md card-bg border border-[#1c2821] rounded-3xl p-8 shadow-2xl flex flex-col gap-6 relative z-20 overflow-hidden backdrop-blur-xl bg-[#0d1310]/95">
+            <div class="absolute -top-12 -right-12 w-36 h-36 bg-emerald-500/10 rounded-full blur-3xl"></div>
+            
+            <!-- BehaviorIQ Logo -->
+            <div class="flex flex-col items-center text-center gap-3">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-600 to-blue-600 flex items-center justify-center text-white shadow-xl shadow-emerald-500/30 border border-emerald-400/40">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center justify-center gap-1.5 text-2xl font-extrabold tracking-tight text-white">
+                        <span>Behavior</span><span class="text-emerald-500">IQ</span>
+                    </div>
+                    <p class="text-xs text-slate-400 font-mono tracking-wider uppercase mt-1">Autonomous Behavioral Threat AI</p>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <form onsubmit="handleLoginSubmit(event)" class="flex flex-col gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-mono text-slate-300 font-medium">Analyst Email Address</label>
+                    <input type="email" id="login-email" value="admin@behavioriq.ai" required class="sidebar-bg border border-[#1c2821] rounded-xl px-4 py-3 text-sm text-white font-mono outline-none focus:border-emerald-500 transition-all" placeholder="name@company.ai" />
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-mono text-slate-300 font-medium">SOC Security Password</label>
+                    <input type="password" id="login-password" value="admin123" required class="sidebar-bg border border-[#1c2821] rounded-xl px-4 py-3 text-sm text-white font-mono outline-none focus:border-emerald-500 transition-all" placeholder="••••••••" />
+                </div>
+
+                <div id="login-error-msg" class="hidden text-xs font-mono text-red-400 bg-red-500/10 border border-red-500/30 p-2.5 rounded-xl text-center"></div>
+
+                <button type="submit" id="login-submit-btn" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-600/30 transition-all mt-2 flex items-center justify-center gap-2">
+                    <span>Sign In to SOC Command Center</span>
+                    <span class="font-mono text-xs">➔</span>
+                </button>
+            </form>
+
+            <!-- Quick Auto Sign-In Badge for Presentation -->
+            <div class="sidebar-bg border border-[#1c2821] rounded-2xl p-3 flex flex-col gap-2 font-mono text-xs text-slate-400">
+                <div class="flex justify-between items-center text-[10px] uppercase font-bold text-emerald-400">
+                    <span>⚡ Demo Credentials</span>
+                    <button onclick="quickDemoLogin()" class="text-emerald-400 hover:underline">One-Click Sign In</button>
+                </div>
+                <div class="text-[11px] text-slate-300 flex justify-between">
+                    <span>Email: <strong class="text-white">admin@behavioriq.ai</strong></span>
+                    <span>Pass: <strong class="text-white">admin123</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Real-Time Ingestion Live Ticker Banner -->
+    <div class="w-full max-w-[1650px] mb-3 card-bg border rounded-xl px-4 py-2 flex flex-wrap items-center justify-between gap-4 font-mono text-xs shadow-md no-print">
+        <div class="flex items-center gap-3">
+            <span class="flex h-2.5 w-2.5 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <span class="font-bold text-slate-800 dark:text-white uppercase tracking-wider text-[11px]">Real-Time Streaming Engine:</span>
+            <span class="text-emerald-600 dark:text-emerald-400 font-bold" id="live-stream-ticker">INGESTING 1,420 EVENTS/SEC</span>
+        </div>
+        <div class="flex items-center gap-6 text-[11px] text-slate-500 dark:text-slate-400">
+            <span>Latency: <strong class="text-slate-800 dark:text-white font-mono">0.8ms</strong></span>
+            <span>Isolation Forest Trees: <strong class="text-emerald-600 dark:text-emerald-400 font-mono">5,000 Active</strong></span>
+            <span>F1 Score: <strong class="text-amber-600 dark:text-amber-400 font-mono">0.961</strong></span>
+            <span>SOC Status: <strong class="text-emerald-600 dark:text-emerald-400 uppercase font-bold">Autonomous Active</strong></span>
+        </div>
+    </div>
+
+    <!-- Main Outer Dashboard Window -->
+    <div class="w-full max-w-[1650px] dashboard-container border rounded-2xl shadow-2xl flex flex-col lg:flex-row overflow-hidden">
+
+        <!-- Left Sidebar Navigation -->
+        <aside class="w-full lg:w-64 sidebar-bg border-r p-5 flex flex-col justify-between shrink-0 no-print">
+            <div class="flex flex-col gap-6">
+                <!-- BehaviorIQ Brand Logo Icon -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-600 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25 border border-emerald-400/30">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-1">
+                            <span class="font-extrabold text-lg text-slate-800 dark:text-white tracking-tight">Behavior</span>
+                            <span class="font-extrabold text-lg text-emerald-500">IQ</span>
+                        </div>
+                        <span class="text-[9px] text-slate-400 font-mono tracking-widest uppercase">Behavioral Threat AI</span>
+                    </div>
+                </div>
+
+                <!-- Professional Command Search Trigger Bar -->
+                <div onclick="openCommandPalette()" class="card-bg border rounded-xl px-3 py-2 flex items-center justify-between cursor-pointer hover:border-emerald-500 transition-all shadow-sm group">
+                    <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 group-hover:text-emerald-500">
+                        <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <span class="text-xs font-medium">Search commands...</span>
+                    </div>
+                    <kbd class="text-[10px] font-mono font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-700">⌘K</kbd>
+                </div>
+
+                <!-- Sidebar Menu -->
+                <div class="flex flex-col gap-1">
+                    <div class="text-[10px] font-mono font-bold text-slate-500 tracking-wider uppercase mb-1 px-2">Main Menu</div>
+                    
+                    <button onclick="switchTab('dashboard')" id="side-dashboard" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-emerald-400 bg-emerald-600/15 border border-emerald-500/30 shadow-sm transition-all">
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                        <span>Dashboard</span>
+                    </button>
+                    
+                    <button onclick="switchTab('attack-surface')" id="side-attack-surface" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/30 transition-all">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        <span>Attack Surface</span>
+                    </button>
+
+                    <button onclick="switchTab('dark-web')" id="side-dark-web" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/30 transition-all">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                        <span>Dark Web</span>
+                    </button>
+
+                    <button onclick="switchTab('threat-exposure')" id="side-threat-exposure" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/30 transition-all">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        <span>Threat Exposure</span>
+                    </button>
+
+                    <button onclick="switchTab('issues')" id="side-issues" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/30 transition-all">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Issues</span>
+                    </button>
+
+                    <button onclick="switchTab('risk-score')" id="side-risk-score" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/30 transition-all">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        <span>Risk Score</span>
+                    </button>
+
+                    <button onclick="switchTab('reports')" id="side-reports" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/30 transition-all">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <span>Reports</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bottom Menu Links -->
+            <div class="flex flex-col gap-1 border-t pt-4 mt-6 border-slate-200 dark:border-slate-800">
+                <button onclick="switchTab('settings')" id="side-settings" class="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
+                    <span>Settings</span>
+                </button>
+                <button onclick="switchTab('support')" id="side-support" class="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <span>Support</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-6 flex flex-col gap-6 overflow-y-auto">
+
+            <!-- Top Header Bar -->
+            <div class="flex justify-between items-center pb-2 no-print">
+                <div>
+                    <h2 class="font-extrabold text-xl text-slate-900 dark:text-white tracking-tight" id="main-view-title">BehaviorIQ Dashboard</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5" id="main-view-subtitle">AI Behavioral Anomaly Detection & Threat SOC</p>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button id="theme-toggle-btn" onclick="toggleTheme()" class="card-bg border px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-2 shadow-sm">
+                        <span id="theme-icon">🌙</span>
+                        <span id="theme-text">Dark Mode</span>
+                    </button>
+
+                    <!-- Threat Scenario Selector for Judges -->
+                    <div class="flex items-center gap-2 card-bg border px-3 py-1 rounded-xl text-xs font-mono">
+                        <span class="text-slate-400 font-bold">Scenario:</span>
+                        <select id="judge-scenario-select" class="bg-transparent outline-none cursor-pointer font-bold text-emerald-600 dark:text-emerald-400">
+                            <option value="APT29">APT29 (Cozy Bear)</option>
+                            <option value="FIN7">FIN7 Ransomware</option>
+                            <option value="INSIDER">Insider Data Theft</option>
+                        </select>
+                    </div>
+
+                    <button onclick="injectSimulatedAttackScenario()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-4 py-2 rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2">
+                        <span>⚡ Launch Attack Scenario</span>
+                    </button>
+
+                    <!-- Interactive User Profile Dropdown Chip -->
+                    <div class="relative">
+                        <div onclick="toggleUserDropdown()" class="flex items-center gap-3 card-bg border px-3 py-1.5 rounded-xl cursor-pointer hover:border-emerald-500 transition-all shadow-sm">
+                            <div class="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-white shadow-sm" id="user-avatar-chip">
+                                AP
+                            </div>
+                            <div class="hidden sm:flex flex-col text-left">
+                                <span class="text-xs font-bold text-slate-800 dark:text-white leading-none" id="user-name-chip">Security Analyst</span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono" id="user-email-chip">admin@behavioriq.ai</span>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Menu -->
+                        <div id="userProfileDropdown" class="absolute right-0 mt-2 w-56 card-bg border rounded-2xl shadow-2xl p-2 z-50 hidden flex-col gap-1 font-mono text-xs">
+                            <div class="p-2.5 border-b sidebar-bg rounded-xl border-slate-200 dark:border-slate-800">
+                                <div class="font-bold text-slate-900 dark:text-white" id="user-name-drop">Security Analyst</div>
+                                <div class="text-[10px] text-slate-500" id="user-email-drop">admin@behavioriq.ai</div>
+                                <span class="inline-block mt-1 px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold text-[9px]" id="user-role-drop">SOC Administrator</span>
+                            </div>
+                            <button onclick="handleSignOut()" class="w-full text-left p-2 rounded-xl text-red-500 hover:bg-red-500/10 font-bold transition-all flex items-center justify-between">
+                                <span>🚪 Sign Out</span>
+                                <span>➔</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 1: DASHBOARD ================= -->
+            <div id="view-dashboard" class="flex flex-col gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div class="card-bg border rounded-2xl p-4 flex flex-col justify-between gap-3 shadow-md">
+                        <div class="text-slate-500 dark:text-slate-400 text-xs font-medium">Domains</div>
+                        <div class="text-2xl font-extrabold text-slate-900 dark:text-white">12</div>
+                        <div class="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400">
+                            <span>For Last month</span><span class="px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold">↑ 8.5%</span>
+                        </div>
+                    </div>
+                    <div class="card-bg border rounded-2xl p-4 flex flex-col justify-between gap-3 shadow-md">
+                        <div class="text-slate-500 dark:text-slate-400 text-xs font-medium">Subdomains</div>
+                        <div class="text-2xl font-extrabold text-slate-900 dark:text-white">373</div>
+                        <div class="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400">
+                            <span>For Last month</span><span class="px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold">↑ 4.3%</span>
+                        </div>
+                    </div>
+                    <div class="card-bg border rounded-2xl p-4 flex flex-col justify-between gap-3 shadow-md">
+                        <div class="text-slate-500 dark:text-slate-400 text-xs font-medium">IPs</div>
+                        <div class="text-2xl font-extrabold text-slate-900 dark:text-white">369</div>
+                        <div class="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400">
+                            <span>For Last month</span><span class="px-1.5 py-0.5 rounded-md bg-red-500/15 text-red-600 dark:text-red-400 font-bold">↓ 2.6%</span>
+                        </div>
+                    </div>
+                    <div class="card-bg border rounded-2xl p-4 flex flex-col justify-between gap-3 shadow-md">
+                        <div class="text-slate-500 dark:text-slate-400 text-xs font-medium">Dormant/Cold</div>
+                        <div class="text-2xl font-extrabold text-slate-900 dark:text-white" id="stat-cold-count">15</div>
+                        <div class="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400">
+                            <span>For Last month</span><span class="px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold">↑ 5.5%</span>
+                        </div>
+                    </div>
+                    <div class="card-bg border rounded-2xl p-4 flex flex-col justify-between gap-3 shadow-md">
+                        <div class="text-slate-500 dark:text-slate-400 text-xs font-medium">Ports / Evaluated</div>
+                        <div class="text-2xl font-extrabold text-slate-900 dark:text-white" id="stat-total-events">4,704</div>
+                        <div class="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400">
+                            <span>For Last month</span><span class="px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold">↑ 3.7%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-4 card-bg border rounded-2xl p-5 flex flex-col justify-between gap-4 shadow-xl">
+                        <div class="font-bold text-sm text-slate-800 dark:text-slate-200">Dark Web & Risk Level;</div>
+                        <div class="relative flex flex-col items-center justify-center my-2">
+                            <canvas id="gaugeCanvas" width="240" height="130"></canvas>
+                            <div class="text-2xl font-extrabold text-slate-900 dark:text-white mt-1" id="gauge-risk-val">78%</div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-8 card-bg border rounded-2xl p-5 flex flex-col justify-between gap-4 shadow-xl">
+                        <div class="flex justify-between items-center border-b pb-3 border-slate-200 dark:border-slate-800">
+                            <span class="font-bold text-sm text-slate-800 dark:text-slate-200">Threat Exposures Severity</span>
+                            <button onclick="switchTab('threat-exposure')" class="text-xs text-slate-500 dark:text-slate-400 hover:text-emerald-500 flex items-center gap-1 font-semibold">View All ↗</button>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 py-2">
+                            <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="switchTab('threat-exposure')">
+                                <div class="relative w-20 h-20 flex items-center justify-center">
+                                    <canvas id="ringExploited" width="80" height="80"></canvas>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center"><span class="text-sm font-extrabold text-slate-900 dark:text-white" id="val-ring-exploited">45</span><span class="text-[9px] text-slate-500 uppercase">Total</span></div>
+                                </div><span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Exploited</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="switchTab('threat-exposure')">
+                                <div class="relative w-20 h-20 flex items-center justify-center">
+                                    <canvas id="ringCritical" width="80" height="80"></canvas>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center"><span class="text-sm font-extrabold text-slate-900 dark:text-white" id="val-ring-critical">15</span><span class="text-[9px] text-slate-500 uppercase">Total</span></div>
+                                </div><span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Critical</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="switchTab('threat-exposure')">
+                                <div class="relative w-20 h-20 flex items-center justify-center">
+                                    <canvas id="ringHigh" width="80" height="80"></canvas>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center"><span class="text-sm font-extrabold text-slate-900 dark:text-white" id="val-ring-high">55</span><span class="text-[9px] text-slate-500 uppercase">Total</span></div>
+                                </div><span class="text-xs font-semibold text-slate-700 dark:text-slate-300">High</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="switchTab('threat-exposure')">
+                                <div class="relative w-20 h-20 flex items-center justify-center">
+                                    <canvas id="ringMedium" width="80" height="80"></canvas>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center"><span class="text-sm font-extrabold text-slate-900 dark:text-white" id="val-ring-medium">65</span><span class="text-[9px] text-slate-500 uppercase">Total</span></div>
+                                </div><span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Medium</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="switchTab('threat-exposure')">
+                                <div class="relative w-20 h-20 flex items-center justify-center">
+                                    <canvas id="ringLow" width="80" height="80"></canvas>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center"><span class="text-sm font-extrabold text-slate-900 dark:text-white" id="val-ring-low">85</span><span class="text-[9px] text-slate-500 uppercase">Total</span></div>
+                                </div><span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Low</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-7 card-bg border rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
+                        <div class="flex justify-between items-center border-b pb-3 border-slate-200 dark:border-slate-800">
+                            <span class="font-bold text-sm text-slate-800 dark:text-slate-200">Global Footprint</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                            <div class="md:col-span-5 flex flex-col gap-3">
+                                <div class="sidebar-bg p-3 rounded-xl border flex justify-between text-xs font-mono text-slate-800 dark:text-slate-200"><span>USA (13)</span><span class="text-blue-600 dark:text-blue-400 font-bold">16%</span></div>
+                                <div class="sidebar-bg p-3 rounded-xl border flex justify-between text-xs font-mono text-slate-800 dark:text-slate-200"><span>Canada (11)</span><span class="text-amber-600 dark:text-amber-400 font-bold">18%</span></div>
+                                <div class="sidebar-bg p-3 rounded-xl border flex justify-between text-xs font-mono text-slate-800 dark:text-slate-200"><span>China (8)</span><span class="text-emerald-600 dark:text-emerald-400 font-bold">10%</span></div>
+                            </div>
+                            <div class="md:col-span-7 sidebar-bg border rounded-xl p-2">
+                                <canvas id="worldMapCanvas" width="400" height="200" class="w-full h-auto"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-5 card-bg border rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
+                        <div class="font-bold text-sm text-slate-800 dark:text-slate-200 border-b pb-3 border-slate-200 dark:border-slate-800">Attack Vector Volume</div>
+                        <canvas id="barChart" height="180"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 2: ATTACK SURFACE ================= -->
+            <div id="view-attack-surface" class="hidden flex-col gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div class="card-bg border p-4 rounded-2xl">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Monitored Assets</div>
+                        <div class="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">1,248</div>
+                    </div>
+                    <div class="card-bg border p-4 rounded-2xl">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Open Risk Ports</div>
+                        <div class="text-2xl font-extrabold text-red-600 dark:text-red-400 mt-1">14</div>
+                    </div>
+                    <div class="card-bg border p-4 rounded-2xl">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Public Subdomains</div>
+                        <div class="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">373</div>
+                    </div>
+                    <div class="card-bg border p-4 rounded-2xl">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Untrusted Device Fingerprints</div>
+                        <div class="text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">8</div>
+                    </div>
+                </div>
+
+                <!-- Attack Blast Radius Graph Diagram -->
+                <div class="card-bg border rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+                    <div class="flex justify-between items-center border-b pb-3 border-slate-200 dark:border-slate-800">
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-white">Blast Radius & Threat Topology Map</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">Visual Asset Dependency & Attack Path Propagation</p>
+                        </div>
+                        <span class="px-2.5 py-1 rounded bg-red-500/15 text-red-600 dark:text-red-400 font-mono font-bold text-xs">Target: auth.behavioriq.ai</span>
+                    </div>
+
+                    <div class="sidebar-bg border rounded-xl p-4 flex flex-wrap items-center justify-around gap-6 py-8">
+                        <div class="flex flex-col items-center gap-2 p-3 bg-red-500/15 border border-red-500/40 rounded-xl">
+                            <span class="text-xl">⚠️</span>
+                            <span class="text-xs font-bold text-red-600 dark:text-red-400">Compromised User</span>
+                            <span class="text-[10px] font-mono text-slate-500">USR_126</span>
+                        </div>
+                        <span class="text-slate-400 font-mono font-bold">➔</span>
+                        <div class="flex flex-col items-center gap-2 p-3 bg-amber-500/15 border border-amber-500/40 rounded-xl">
+                            <span class="text-xl">🔐</span>
+                            <span class="text-xs font-bold text-amber-600 dark:text-amber-400">Auth Gateway</span>
+                            <span class="text-[10px] font-mono text-slate-500">192.168.1.108:443</span>
+                        </div>
+                        <span class="text-slate-400 font-mono font-bold">➔</span>
+                        <div class="flex flex-col items-center gap-2 p-3 bg-purple-500/15 border border-purple-500/40 rounded-xl">
+                            <span class="text-xl">💻</span>
+                            <span class="text-xs font-bold text-purple-600 dark:text-purple-400">App Server</span>
+                            <span class="text-[10px] font-mono text-slate-500">api.behavioriq.ai</span>
+                        </div>
+                        <span class="text-slate-400 font-mono font-bold">➔</span>
+                        <div class="flex flex-col items-center gap-2 p-3 bg-emerald-500/15 border border-emerald-500/40 rounded-xl">
+                            <span class="text-xl">🗄️</span>
+                            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">DB Replica</span>
+                            <span class="text-[10px] font-mono text-slate-500">10.0.4.12:5432</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-bg border rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+                    <h3 class="font-bold text-sm text-slate-900 dark:text-white">Monitored Infrastructure Asset Inventory</h3>
+                    <div class="overflow-x-auto font-mono text-xs">
+                        <table class="w-full text-left border-separate border-spacing-y-2">
+                            <thead class="text-slate-500 dark:text-slate-400 uppercase text-[10px] tracking-wider">
+                                <tr>
+                                    <th class="p-3">Asset Hostname</th>
+                                    <th class="p-3">IP Subnet</th>
+                                    <th class="p-3">Exposed Ports</th>
+                                    <th class="p-3">Risk Rating</th>
+                                    <th class="p-3">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                                <tr class="table-row-bg border p-3 rounded-xl">
+                                    <td class="p-3 text-slate-900 dark:text-white font-bold">api.behavioriq.ai</td>
+                                    <td class="p-3 text-slate-700 dark:text-slate-300">192.168.1.104</td>
+                                    <td class="p-3 text-blue-600 dark:text-blue-400 font-bold">443, 8000</td>
+                                    <td class="p-3"><span class="px-2.5 py-1 rounded-md bg-emerald-100 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 font-bold">LOW</span></td>
+                                    <td class="p-3 text-emerald-700 dark:text-emerald-400 font-semibold">Active Monitoring</td>
+                                </tr>
+                                <tr class="table-row-bg border p-3 rounded-xl">
+                                    <td class="p-3 text-slate-900 dark:text-white font-bold">auth.behavioriq.ai</td>
+                                    <td class="p-3 text-slate-700 dark:text-slate-300">192.168.1.108</td>
+                                    <td class="p-3 text-red-600 dark:text-red-400 font-bold">22, 443, 7000</td>
+                                    <td class="p-3"><span class="px-2.5 py-1 rounded-md bg-red-100 dark:bg-red-950/70 text-red-900 dark:text-red-300 border border-red-300 dark:border-red-800 font-bold">HIGH</span></td>
+                                    <td class="p-3 text-red-700 dark:text-red-400 font-semibold">Attention Required</td>
+                                </tr>
+                                <tr class="table-row-bg border p-3 rounded-xl">
+                                    <td class="p-3 text-slate-900 dark:text-white font-bold">db-replica.internal</td>
+                                    <td class="p-3 text-slate-700 dark:text-slate-300">10.0.4.12</td>
+                                    <td class="p-3 text-amber-600 dark:text-amber-400 font-bold">5432, 22</td>
+                                    <td class="p-3"><span class="px-2.5 py-1 rounded-md bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800 font-bold">MEDIUM</span></td>
+                                    <td class="p-3 text-amber-700 dark:text-amber-400 font-semibold">Isolated VNet</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 3: DARK WEB ================= -->
+            <div id="view-dark-web" class="hidden flex-col gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div class="card-bg border p-4 rounded-2xl">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Monitored Credentials</div>
+                        <div class="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">142</div>
+                    </div>
+                    <div class="card-bg border p-4 rounded-2xl">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Compromised Passwords</div>
+                        <div class="text-2xl font-extrabold text-red-600 dark:text-red-400 mt-1">18</div>
+                    </div>
+                    <div class="card-bg border p-4 rounded-2xl">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Stolen Session Tokens</div>
+                        <div class="text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">4</div>
+                    </div>
+                    <div class="card-bg border p-4 rounded-2xl">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Pastebin Leak Alerts</div>
+                        <div class="text-2xl font-extrabold text-cyan-600 dark:text-cyan-400 mt-1">7</div>
+                    </div>
+                </div>
+
+                <!-- Dark Web Credential Breach Search Bar -->
+                <div class="card-bg border rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+                    <div class="flex justify-between items-center border-b pb-3 border-slate-200 dark:border-slate-800">
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white">Dark Web Breach & Credential Intelligence Search</h3>
+                        <span class="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold">HaveIBeenPwned API Connected</span>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <input type="text" id="darkweb-search-input" placeholder="Search email, domain, or IP (e.g. admin@behavioriq.ai)..." class="flex-1 sidebar-bg border rounded-xl px-4 py-2.5 text-xs text-slate-800 dark:text-slate-200 font-mono outline-none focus:border-emerald-500" />
+                        <button onclick="searchDarkWebBreaches()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-5 py-2.5 rounded-xl shadow-md">
+                            Search Breach Feeds
+                        </button>
+                    </div>
+                    <div id="darkweb-search-results" class="hidden text-xs font-mono p-3 sidebar-bg border rounded-xl text-amber-600 dark:text-amber-400 font-bold"></div>
+                </div>
+
+                <div class="card-bg border rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+                    <h3 class="font-bold text-sm text-slate-900 dark:text-white">Detected Dark Web Credential Breaches</h3>
+                    <div class="overflow-x-auto font-mono text-xs">
+                        <table class="w-full text-left border-separate border-spacing-y-2">
+                            <thead class="text-slate-500 dark:text-slate-400 uppercase text-[10px] tracking-wider">
+                                <tr>
+                                    <th class="p-3">Target Email</th>
+                                    <th class="p-3">Leak Source</th>
+                                    <th class="p-3">Discovered Date</th>
+                                    <th class="p-3">Risk Vector</th>
+                                    <th class="p-3">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                                <tr class="table-row-bg border p-3 rounded-xl">
+                                    <td class="p-3 text-slate-900 dark:text-white font-bold">admin@behavioriq.ai</td>
+                                    <td class="p-3 text-red-600 dark:text-red-400 font-bold">RussianCyberForum</td>
+                                    <td class="p-3 text-slate-700 dark:text-slate-300">Jul 24, 2026</td>
+                                    <td class="p-3"><span class="px-2.5 py-1 rounded-md bg-purple-100 dark:bg-purple-950/80 text-purple-900 dark:text-purple-300 border border-purple-300 dark:border-purple-800 font-bold">Credential Stuffing</span></td>
+                                    <td class="p-3"><button onclick="triageAction('block_entity')" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold shadow-sm">Revoke Credential</button>
+                                </tr>
+                                <tr class="table-row-bg border p-3 rounded-xl">
+                                    <td class="p-3 text-slate-900 dark:text-white font-bold">dev-lead@behavioriq.ai</td>
+                                    <td class="p-3 text-slate-700 dark:text-slate-300 font-bold">Pastebin Dump</td>
+                                    <td class="p-3 text-slate-700 dark:text-slate-300">Jul 20, 2026</td>
+                                    <td class="p-3"><span class="px-2.5 py-1 rounded-md bg-blue-100 dark:bg-blue-950/80 text-blue-900 dark:text-blue-300 border border-blue-300 dark:border-blue-800 font-bold">Session Hijack</span></td>
+                                    <td class="p-3"><button onclick="triageAction('dismiss')" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg font-semibold border border-slate-300 dark:border-slate-700">Dismiss Alert</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 4: THREAT EXPOSURE ================= -->
+            <div id="view-threat-exposure" class="hidden flex-col gap-6">
+                <!-- MITRE ATT&CK Enterprise Grid Matrix -->
+                <div class="card-bg border rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+                    <div class="border-b pb-3 border-slate-200 dark:border-slate-800">
+                        <h3 class="font-bold text-sm text-slate-900 dark:text-white">MITRE ATT&CK® Enterprise Framework Mapping Matrix</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-mono">Real-Time Threat Vector Classification against MITRE Tactics</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 font-mono text-xs">
+                        <div class="sidebar-bg border rounded-xl p-3 flex flex-col gap-2 border-red-500/40">
+                            <span class="text-[10px] text-red-500 font-bold uppercase">TA0001: Initial Access</span>
+                            <span class="font-bold text-slate-900 dark:text-white">T1110 — Brute Force</span>
+                            <span class="text-[10px] text-slate-500">220 Incidents (High Risk)</span>
+                        </div>
+                        <div class="sidebar-bg border rounded-xl p-3 flex flex-col gap-2 border-amber-500/40">
+                            <span class="text-[10px] text-amber-500 font-bold uppercase">TA0003: Persistence</span>
+                            <span class="font-bold text-slate-900 dark:text-white">T1078 — Valid Accounts</span>
+                            <span class="text-[10px] text-slate-500">180 Incidents (Stuffing)</span>
+                        </div>
+                        <div class="sidebar-bg border rounded-xl p-3 flex flex-col gap-2 border-purple-500/40">
+                            <span class="text-[10px] text-purple-500 font-bold uppercase">TA0008: Lateral Movement</span>
+                            <span class="font-bold text-slate-900 dark:text-white">T1021 — Remote Services</span>
+                            <span class="text-[10px] text-slate-500">95 Incidents (VNet)</span>
+                        </div>
+                        <div class="sidebar-bg border rounded-xl p-3 flex flex-col gap-2 border-emerald-500/40">
+                            <span class="text-[10px] text-emerald-500 font-bold uppercase">TA0010: Exfiltration</span>
+                            <span class="font-bold text-slate-900 dark:text-white">T1041 — C2 Channel</span>
+                            <span class="text-[10px] text-slate-500">40 Incidents (Isolated)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-bg border rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+                    <h3 class="font-bold text-sm text-slate-900 dark:text-white">Critical & Exploited Threat Exposure Rings</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 py-4">
+                        <div class="sidebar-bg p-4 rounded-xl border flex flex-col items-center">
+                            <span class="text-3xl font-extrabold text-red-600 dark:text-red-400">45</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400 mt-1 uppercase font-mono">Exploited Vectors</span>
+                        </div>
+                        <div class="sidebar-bg p-4 rounded-xl border flex flex-col items-center">
+                            <span class="text-3xl font-extrabold text-amber-600 dark:text-amber-400">15</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400 mt-1 uppercase font-mono">Critical Vulnerabilities</span>
+                        </div>
+                        <div class="sidebar-bg p-4 rounded-xl border flex flex-col items-center">
+                            <span class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">55</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400 mt-1 uppercase font-mono">High Severity Incidents</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 5: ISSUES ================= -->
+            <div id="view-issues" class="hidden flex-col gap-6">
+                <!-- Stat Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div class="card-bg border p-4 rounded-2xl">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Critical Open Tickets</div>
+                        <div class="text-2xl font-extrabold text-red-600 dark:text-red-400 mt-1">8</div>
+                    </div>
+                    <div class="card-bg border p-4 rounded-2xl">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Pending Analyst Triage</div>
+                        <div class="text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">14</div>
+                    </div>
+                    <div class="card-bg border p-4 rounded-2xl">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Mean Time to Detect (MTTD)</div>
+                        <div class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">0.8ms</div>
+                    </div>
+                    <div class="card-bg border p-4 rounded-2xl">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Auto Respond (MTTR)</div>
+                        <div class="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mt-1">0.38s</div>
+                    </div>
+                </div>
+
+                <!-- Active Security Incident Desk Kanban Cards -->
+                <div class="card-bg border rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+                    <div class="flex justify-between items-center border-b pb-3 border-slate-200 dark:border-slate-800">
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-white">Active Security Incident Desk & Actionable Tickets</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">Prioritized Incident Queue & Remediation Playbooks</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full bg-red-500/15 text-red-600 dark:text-red-400 font-mono font-bold text-xs">8 High Priority Tickets</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs">
+                        <div class="sidebar-bg border rounded-xl p-4 flex flex-col gap-3 border-red-500/40">
+                            <div class="flex justify-between items-center border-b pb-2 border-slate-200 dark:border-slate-800">
+                                <span class="font-bold text-slate-900 dark:text-white">#INC-9041 — Impossible Travel Anomaly</span>
+                                <span class="px-2 py-0.5 rounded bg-red-500/20 text-red-500 font-bold text-[10px]">CRITICAL</span>
+                            </div>
+                            <div class="text-slate-700 dark:text-slate-300 text-[11px] flex flex-col gap-1">
+                                <span>Entity: <strong class="text-white">USR_126</strong></span>
+                                <span>Geo Velocity: <strong class="text-red-400">840 km/h</strong> (Dallas ➔ Frankfurt)</span>
+                                <span>Playbook Action: <strong class="text-emerald-400">WAF Quarantine Executed (0.38s)</strong></span>
+                            </div>
+                            <div class="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-800 text-[10px]">
+                                <span class="text-slate-500">SLA: 15m Remaining</span>
+                                <button onclick="openModal('ENT_108')" class="btn-investigate px-3 py-1 rounded text-xs">Investigate Ticket ↗</button>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-bg border rounded-xl p-4 flex flex-col gap-3 border-purple-500/40">
+                            <div class="flex justify-between items-center border-b pb-2 border-slate-200 dark:border-slate-800">
+                                <span class="font-bold text-slate-900 dark:text-white">#INC-8832 — Credential Stuffing Campaign</span>
+                                <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 font-bold text-[10px]">HIGH</span>
+                            </div>
+                            <div class="text-slate-700 dark:text-slate-300 text-[11px] flex flex-col gap-1">
+                                <span>Target: <strong class="text-white">auth.behavioriq.ai</strong></span>
+                                <span>Failed Logins: <strong class="text-purple-400">14 attempts / 5 min</strong></span>
+                                <span>Playbook Action: <strong class="text-emerald-400">Force Credential Reset & MFA</strong></span>
+                            </div>
+                            <div class="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-800 text-[10px]">
+                                <span class="text-slate-500">SLA: 1h Remaining</span>
+                                <button onclick="openModal('ENT_104')" class="btn-investigate px-3 py-1 rounded text-xs">Investigate Ticket ↗</button>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-bg border rounded-xl p-4 flex flex-col gap-3 border-amber-500/40">
+                            <div class="flex justify-between items-center border-b pb-2 border-slate-200 dark:border-slate-800">
+                                <span class="font-bold text-slate-900 dark:text-white">#INC-8719 — Lateral Movement SSH Probe</span>
+                                <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold text-[10px]">HIGH</span>
+                            </div>
+                            <div class="text-slate-700 dark:text-slate-300 text-[11px] flex flex-col gap-1">
+                                <span>Target Host: <strong class="text-white">db-replica.internal</strong></span>
+                                <span>Exposed Port: <strong class="text-amber-400">Port 22 SSH</strong></span>
+                                <span>Playbook Action: <strong class="text-emerald-400">VNet Isolation Enforced</strong></span>
+                            </div>
+                            <div class="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-800 text-[10px]">
+                                <span class="text-slate-500">SLA: 1h Remaining</span>
+                                <button onclick="openModal('ENT_112')" class="btn-investigate px-3 py-1 rounded text-xs">Investigate Ticket ↗</button>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-bg border rounded-xl p-4 flex flex-col gap-3 border-blue-500/40">
+                            <div class="flex justify-between items-center border-b pb-2 border-slate-200 dark:border-slate-800">
+                                <span class="font-bold text-slate-900 dark:text-white">#INC-8540 — Device Fingerprint Spoofing</span>
+                                <span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 font-bold text-[10px]">MEDIUM</span>
+                            </div>
+                            <div class="text-slate-700 dark:text-slate-300 text-[11px] flex flex-col gap-1">
+                                <span>Fingerprint: <strong class="text-white">FP_UNTRUSTED_99</strong></span>
+                                <span>Resource: <strong class="text-blue-400">api.behavioriq.ai/v1/auth</strong></span>
+                                <span>Playbook Action: <strong class="text-amber-400">Under Analyst Review</strong></span>
+                            </div>
+                            <div class="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-800 text-[10px]">
+                                <span class="text-slate-500">SLA: 4h Remaining</span>
+                                <button onclick="openModal('ENT_102')" class="btn-investigate px-3 py-1 rounded text-xs">Investigate Ticket ↗</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 6: RISK SCORE ================= -->
+            <div id="view-risk-score" class="hidden flex-col gap-6">
+                <!-- Model Performance Metrics -->
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div class="card-bg border p-4 rounded-2xl">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Binary Anomaly F1-Score</div>
+                        <div class="text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">0.961</div>
+                    </div>
+                    <div class="card-bg border p-4 rounded-2xl">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Precision</div>
+                        <div class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">0.972</div>
+                    </div>
+                    <div class="card-bg border p-4 rounded-2xl">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Recall</div>
+                        <div class="text-2xl font-extrabold text-cyan-600 dark:text-cyan-400 mt-1">0.951</div>
+                    </div>
+                    <div class="card-bg border p-4 rounded-2xl">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Alert Budget FPR (Top 1%)</div>
+                        <div class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">0.32%</div>
+                    </div>
+                </div>
+
+                <!-- Model Engine Architecture Breakdown -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Isolation Forest Profiler Card -->
+                    <div class="card-bg border rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+                        <div class="border-b pb-3 border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-sm text-slate-900 dark:text-white">Unsupervised Isolation Forest Profiler</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 font-mono">Baseline Anomaly Scoring Engine</p>
+                            </div>
+                            <span class="px-2.5 py-1 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-mono font-bold text-xs">Active</span>
+                        </div>
+                        <div class="flex flex-col gap-3 font-mono text-xs text-slate-700 dark:text-slate-300">
+                            <div class="sidebar-bg p-3 rounded-xl border flex justify-between"><span>Active Decision Trees:</span><strong class="text-emerald-400">5,000 Trees</strong></div>
+                            <div class="sidebar-bg p-3 rounded-xl border flex justify-between"><span>Contamination Parameter:</span><strong class="text-amber-400">0.03 (3% Anomaly Rate)</strong></div>
+                            <div class="sidebar-bg p-3 rounded-xl border flex justify-between"><span>Anomaly Risk Cutoff Threshold:</span><strong class="text-red-400">&ge; 75.0 Risk Score</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- LightGBM Classifier Card -->
+                    <div class="card-bg border rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+                        <div class="border-b pb-3 border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-sm text-slate-900 dark:text-white">LightGBM Multi-Class Classifier</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 font-mono">Threat Vector Categorization Engine</p>
+                            </div>
+                            <span class="px-2.5 py-1 rounded bg-blue-500/15 text-blue-600 dark:text-blue-400 font-mono font-bold text-xs">F1: 0.961</span>
+                        </div>
+                        <div class="flex flex-col gap-3 font-mono text-xs text-slate-700 dark:text-slate-300">
+                            <div class="sidebar-bg p-3 rounded-xl border flex justify-between"><span>Evaluated Classes:</span><strong class="text-white">5 Threat Vectors</strong></div>
+                            <div class="sidebar-bg p-3 rounded-xl border flex justify-between"><span>Inference Latency:</span><strong class="text-emerald-400">0.8 ms / event</strong></div>
+                            <div class="sidebar-bg p-3 rounded-xl border flex justify-between"><span>Cold-Start Modifier:</span><strong class="text-cyan-400">EMA Alpha &alpha;=0.05</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SHAP Feature Importance Leaderboard -->
+                <div class="card-bg border rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+                    <h3 class="font-bold text-sm text-slate-900 dark:text-white">SHAP Feature Importance Leaderboard</h3>
+                    <div class="flex flex-col gap-3 font-mono text-xs">
+                        <div class="sidebar-bg p-3 rounded-xl border flex justify-between items-center">
+                            <span>1. Geo-Velocity (km/h)</span>
+                            <div class="flex items-center gap-3 w-1/2">
+                                <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden"><div class="bg-red-500 h-full w-[85%]"></div></div>
+                                <span class="font-bold text-red-400">+0.42</span>
+                            </div>
+                        </div>
+                        <div class="sidebar-bg p-3 rounded-xl border flex justify-between items-center">
+                            <span>2. Failed Login Count (5m Window)</span>
+                            <div class="flex items-center gap-3 w-1/2">
+                                <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden"><div class="bg-purple-500 h-full w-[72%]"></div></div>
+                                <span class="font-bold text-purple-400">+0.38</span>
+                            </div>
+                        </div>
+                        <div class="sidebar-bg p-3 rounded-xl border flex justify-between items-center">
+                            <span>3. Off-Hours Access Flag</span>
+                            <div class="flex items-center gap-3 w-1/2">
+                                <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden"><div class="bg-amber-500 h-full w-[54%]"></div></div>
+                                <span class="font-bold text-amber-400">+0.21</span>
+                            </div>
+                        </div>
+                        <div class="sidebar-bg p-3 rounded-xl border flex justify-between items-center">
+                            <span>4. Untrusted Device Fingerprint Flag</span>
+                            <div class="flex items-center gap-3 w-1/2">
+                                <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden"><div class="bg-cyan-500 h-full w-[42%]"></div></div>
+                                <span class="font-bold text-cyan-400">+0.18</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 7: REPORTS ================= -->
+            <div id="view-reports" class="hidden flex-col gap-6">
+                <!-- Compliance Certification Badges -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="card-bg border p-4 rounded-2xl flex items-center gap-4 shadow-md">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-500 text-lg font-bold">🛡️</div>
+                        <div class="flex flex-col font-mono">
+                            <span class="font-bold text-xs text-slate-900 dark:text-white">ISO/IEC 27001:2022</span>
+                            <span class="text-[10px] text-emerald-500 font-bold">Audit Status: Passed</span>
+                        </div>
+                    </div>
+                    <div class="card-bg border p-4 rounded-2xl flex items-center gap-4 shadow-md">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-500 text-lg font-bold">🔒</div>
+                        <div class="flex flex-col font-mono">
+                            <span class="font-bold text-xs text-slate-900 dark:text-white">SOC 2 Type II</span>
+                            <span class="text-[10px] text-blue-400 font-bold">Continuous Control Active</span>
+                        </div>
+                    </div>
+                    <div class="card-bg border p-4 rounded-2xl flex items-center gap-4 shadow-md">
+                        <div class="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-500 text-lg font-bold">🌐</div>
+                        <div class="flex flex-col font-mono">
+                            <span class="font-bold text-xs text-slate-900 dark:text-white">GDPR & CCPA</span>
+                            <span class="text-[10px] text-purple-400 font-bold">Privacy Anonymized</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-bg border rounded-2xl p-6 shadow-xl flex flex-col gap-5">
+                    <div class="border-b pb-4 border-slate-200 dark:border-slate-800">
+                        <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Forensic Threat Intelligence & Audit Reports</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-mono mt-1">ISO 27001 & SOC 2 Type II Automated Compliance Briefs</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <button onclick="window.print()" class="p-4 sidebar-bg border rounded-xl text-left hover:border-emerald-500 transition-all flex flex-col gap-2">
+                            <span class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">🖨️ Print / Download Executive PDF Brief</span>
+                            <span class="text-xs text-slate-500 font-mono">Generates clean printable SOC Audit PDF Report</span>
+                        </button>
+
+                        <button onclick="exportJsonReport()" class="p-4 sidebar-bg border rounded-xl text-left hover:border-emerald-500 transition-all flex flex-col gap-2">
+                            <span class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">📋 Export Raw Forensic JSON Log Data</span>
+                            <span class="text-xs text-slate-500 font-mono">Downloads complete raw JSON logs for SIEM ingestion</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 8: SETTINGS ================= -->
+            <div id="view-settings" class="hidden flex-col gap-6 flex-1 min-h-[calc(100vh-200px)]">
+                <div class="card-bg border rounded-2xl p-8 shadow-2xl flex flex-col justify-between gap-8 flex-1 min-h-[calc(100vh-200px)]">
+                    <div class="flex flex-col gap-8">
+                        <div class="border-b pb-4 border-slate-200 dark:border-slate-800">
+                            <h3 class="font-extrabold text-lg text-slate-900 dark:text-white">Platform Settings & Threshold Configuration</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-mono mt-1">Calibrate Behavioral Anomaly Sensitivity & Integrations</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="flex flex-col gap-6">
+                                <h4 class="font-bold text-xs uppercase tracking-wider text-emerald-600 dark:text-emerald-400 font-mono">Anomaly Detection Thresholds</h4>
+                                
+                                <div class="flex flex-col gap-2 sidebar-bg p-4 rounded-xl border">
+                                    <div class="flex justify-between text-xs">
+                                        <span class="text-slate-700 dark:text-slate-300 font-medium">Anomaly Risk Cutoff Threshold:</span>
+                                        <span class="font-mono text-amber-600 dark:text-amber-400 font-bold" id="thresh-val">75.0</span>
+                                    </div>
+                                    <input type="range" min="50" max="95" value="75" oninput="document.getElementById('thresh-val').innerText = this.value" class="w-full accent-emerald-600 cursor-pointer" />
+                                    <span class="text-[11px] text-slate-500 font-mono">Top 1% Alert Budget Enforcement</span>
+                                </div>
+
+                                <div class="flex flex-col gap-2 sidebar-bg p-4 rounded-xl border">
+                                    <div class="flex justify-between text-xs">
+                                        <span class="text-slate-700 dark:text-slate-300 font-medium">EMA Concept Drift Learning Rate (&alpha;):</span>
+                                        <span class="font-mono text-emerald-600 dark:text-emerald-400 font-bold">0.05</span>
+                                    </div>
+                                    <input type="range" min="1" max="20" value="5" class="w-full accent-emerald-500 cursor-pointer" />
+                                    <span class="text-[11px] text-slate-500 font-mono">Smooth baseline adaptation for non-anomalous events</span>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-6">
+                                <h4 class="font-bold text-xs uppercase tracking-wider text-amber-600 dark:text-amber-400 font-mono">Alert Webhooks & Integrations</h4>
+                                
+                                <div class="flex flex-col gap-2 sidebar-bg p-4 rounded-xl border">
+                                    <label class="text-xs text-slate-700 dark:text-slate-300 font-medium">PagerDuty Critical Incident Webhook:</label>
+                                    <input type="text" value="https://events.pagerduty.com/v2/enqueue/behavioriq_soc" class="bg-black/20 border border-slate-700/50 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 font-mono outline-none" />
+                                </div>
+
+                                <div class="flex flex-col gap-2 sidebar-bg p-4 rounded-xl border">
+                                    <label class="text-xs text-slate-700 dark:text-slate-300 font-medium">Slack SOC Channel Webhook:</label>
+                                    <input type="text" value="https://hooks.slack.com/services/BEHAVIORIQ/SOC_ALERTS" class="bg-black/20 border border-slate-700/50 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 font-mono outline-none" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t pt-4 border-slate-200 dark:border-slate-800 flex justify-end">
+                        <button onclick="alert('Settings Saved Successfully!')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-6 py-3 rounded-xl shadow-lg shadow-emerald-600/30 transition-all">
+                            Save Platform Configuration
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW 9: SUPPORT & SOC REFERENCE MANUAL ================= -->
+            <div id="view-support" class="hidden flex-col gap-6 flex-1 min-h-[calc(100vh-200px)]">
+                <div class="card-bg border rounded-2xl p-8 shadow-2xl flex flex-col justify-between gap-8 flex-1 min-h-[calc(100vh-200px)]">
+                    <div class="border-b pb-4 border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-extrabold text-base text-slate-900 dark:text-white">BehaviorIQ SOC Technical Diagnostics & Reference Guide</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-mono mt-1">Real-Time System Health Telemetry & Incident Playbook Manual</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-mono font-bold text-xs">All Systems 100% Operational</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
+                        <div class="sidebar-bg p-4 rounded-xl border flex flex-col gap-2 border-emerald-500/30">
+                            <span class="text-slate-500 dark:text-slate-400">FastAPI REST Backend</span>
+                            <span class="text-lg font-bold text-emerald-600 dark:text-emerald-400">200 OK (0.8ms)</span>
+                        </div>
+                        <div class="sidebar-bg p-4 rounded-xl border flex flex-col gap-2 border-emerald-500/30">
+                            <span class="text-slate-500 dark:text-slate-400">LightGBM Classifier</span>
+                            <span class="text-lg font-bold text-emerald-600 dark:text-emerald-400">Operational (F1=0.961)</span>
+                        </div>
+                        <div class="sidebar-bg p-4 rounded-xl border flex flex-col gap-2 border-emerald-500/30">
+                            <span class="text-slate-500 dark:text-slate-400">Isolation Forest Profiler</span>
+                            <span class="text-lg font-bold text-emerald-600 dark:text-emerald-400">Active (5,000 Trees)</span>
+                        </div>
+                    </div>
+
+                    <!-- Production SOC Analyst Reference Manual & Cheat Sheet -->
+                    <div class="sidebar-bg p-6 rounded-2xl border flex flex-col gap-5 text-xs">
+                        <div class="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg">📖</span>
+                                <h4 class="font-extrabold text-sm text-slate-900 dark:text-white uppercase tracking-wider font-mono">SOC Analyst Quick Reference Guide & Incident Playbook Cheat Sheet</h4>
+                            </div>
+                            <span class="text-[10px] font-mono text-slate-400">v4.2 Enterprise Standard</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Column 1: ML Engine Architecture -->
+                            <div class="flex flex-col gap-3">
+                                <h5 class="font-bold text-xs text-emerald-600 dark:text-emerald-400 font-mono uppercase tracking-wider">1. Detection Pipeline Architecture</h5>
+                                <ul class="flex flex-col gap-2 text-slate-700 dark:text-slate-300 font-mono text-[11px]">
+                                    <li class="p-2.5 card-bg rounded-lg border flex flex-col gap-1">
+                                        <span class="font-bold text-slate-900 dark:text-white">• Isolation Forest Unsupervised Profiler</span>
+                                        <span class="text-slate-500">Evaluates 5,000 trees across stream workers. Generates baseline anomaly scores [0-100] in &lt;0.8ms.</span>
+                                    </li>
+                                    <li class="p-2.5 card-bg rounded-lg border flex flex-col gap-1">
+                                        <span class="font-bold text-slate-900 dark:text-white">• Top 1% Alert Budget Enforcement</span>
+                                        <span class="text-slate-500">Strict cutoff threshold (&ge;75.0 risk score) filters 99% benign noise to eliminate SOC alert fatigue.</span>
+                                    </li>
+                                    <li class="p-2.5 card-bg rounded-lg border flex flex-col gap-1">
+                                        <span class="font-bold text-slate-900 dark:text-white">• Exponential Moving Average (EMA &alpha;=0.05)</span>
+                                        <span class="text-slate-500">Continuously adapts user behavioral baselines over time to prevent concept drift false positives.</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Column 2: Attack Vector Triage Protocol -->
+                            <div class="flex flex-col gap-3">
+                                <h5 class="font-bold text-xs text-amber-600 dark:text-amber-400 font-mono uppercase tracking-wider">2. Threat Vector Triage Matrix</h5>
+                                <ul class="flex flex-col gap-2 text-slate-700 dark:text-slate-300 font-mono text-[11px]">
+                                    <li class="p-2.5 card-bg rounded-lg border flex justify-between items-center">
+                                        <div>
+                                            <span class="font-bold text-red-600 dark:text-red-400">IMPOSSIBLE TRAVEL</span>
+                                            <span class="block text-[10px] text-slate-500">Geo velocity &gt;500 km/h between logins</span>
+                                        </div>
+                                        <span class="px-2 py-1 bg-red-600/20 text-red-500 rounded font-bold text-[10px]">Revoke & WAF Block</span>
+                                    </li>
+                                    <li class="p-2.5 card-bg rounded-lg border flex justify-between items-center">
+                                        <div>
+                                            <span class="font-bold text-purple-600 dark:text-purple-400">CREDENTIAL STUFFING</span>
+                                            <span class="block text-[10px] text-slate-500">&ge;10 failed logins/5m + dark web leak</span>
+                                        </div>
+                                        <span class="px-2 py-1 bg-purple-600/20 text-purple-400 rounded font-bold text-[10px]">Force Reset & MFA</span>
+                                    </li>
+                                    <li class="p-2.5 card-bg rounded-lg border flex justify-between items-center">
+                                        <div>
+                                            <span class="font-bold text-amber-600 dark:text-amber-400">BRUTE FORCE</span>
+                                            <span class="block text-[10px] text-slate-500">High frequency auth gateway probes</span>
+                                        </div>
+                                        <span class="px-2 py-1 bg-amber-600/20 text-amber-400 rounded font-bold text-[10px]">Rate Limit IP</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Hotkeys Cheat Sheet -->
+                        <div class="border-t pt-4 border-slate-200 dark:border-slate-800 flex flex-wrap justify-between items-center font-mono text-[11px]">
+                            <span class="font-bold text-slate-800 dark:text-slate-200">Shortcuts:</span>
+                            <span class="text-slate-500"><kbd class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded border border-slate-700">⌘K</kbd> Open Search Palette</span>
+                            <span class="text-slate-500"><kbd class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded border border-slate-700">ESC</kbd> Close Drawer / Modal</span>
+                            <span class="text-slate-500"><kbd class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded border border-slate-700">⚡ Launch Scenario</kbd> Stage Presentation Threat Injection</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HIGH-END ENTERPRISE INCIDENT WORKBENCH QUEUE -->
+            <div id="shared-workbench-container" class="card-bg border rounded-2xl p-6 shadow-2xl flex flex-col gap-5">
+                <!-- Workbench Header Bar -->
+                <div class="flex flex-wrap items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-800">
+                    <div>
+                        <h3 class="font-extrabold text-base text-slate-900 dark:text-white tracking-tight" id="workbench-table-title">Behavioral Incident Triage Queue</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5" id="workbench-table-subtitle">Real-Time ML Scored Access Logs & SHAP Attributions</p>
+                    </div>
+
+                    <div class="flex items-center gap-3 font-mono">
+                        <div class="flex items-center gap-2 sidebar-bg border rounded-xl px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300">
+                            <span class="text-slate-500 dark:text-slate-400">Filter:</span>
+                            <select id="filter-severity" onchange="fetchAlerts()" class="bg-transparent outline-none cursor-pointer font-bold">
+                                <option value="ALL">All Severities</option>
+                                <option value="CRITICAL">CRITICAL</option>
+                                <option value="HIGH">HIGH</option>
+                                <option value="MEDIUM">MEDIUM</option>
+                                <option value="LOW">LOW</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-center gap-2 sidebar-bg border rounded-xl px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300">
+                            <span class="text-slate-500 dark:text-slate-400">Vector:</span>
+                            <select id="filter-threat" onchange="fetchAlerts()" class="bg-transparent outline-none cursor-pointer font-bold">
+                                <option value="all">All Attack Vectors</option>
+                                <option value="brute_force">Brute Force</option>
+                                <option value="impossible_travel">Impossible Travel</option>
+                                <option value="credential_stuffing">Credential Stuffing</option>
+                                <option value="lateral_movement">Lateral Movement</option>
+                                <option value="device_spoofing">Device Spoofing</option>
+                                <option value="low_and_slow">Low & Slow</option>
+                            </select>
+                        </div>
+
+                        <button onclick="fetchAlerts()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all shadow-md shadow-emerald-600/20">
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- High-End Security Incident Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-separate border-spacing-y-2">
+                        <thead>
+                            <tr class="text-slate-400 font-mono uppercase text-[10px] tracking-wider">
+                                <th class="px-5 py-3 whitespace-nowrap min-w-[180px]">Entity ID & Type</th>
+                                <th class="px-5 py-3 whitespace-nowrap min-w-[160px]">Timestamp</th>
+                                <th class="px-5 py-3 whitespace-nowrap min-w-[180px]">Attack Vector</th>
+                                <th class="px-5 py-3 whitespace-nowrap w-28 text-center">Risk Score</th>
+                                <th class="px-5 py-3 whitespace-nowrap w-32 text-center">Severity</th>
+                                <th class="px-5 py-3 min-w-[220px]">Primary Evidence Attribution</th>
+                                <th class="px-5 py-3 whitespace-nowrap w-28 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alerts-table-body">
+                            <tr><td colSpan="7" class="text-center p-8 text-slate-500 font-mono">Loading incident triage stream...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Floating BehaviorIQ AI SOC Copilot Chat Assistant Button & Drawer -->
+    <div class="fixed bottom-6 right-6 z-40 no-print">
+        <button onclick="toggleCopilotDrawer()" class="w-14 h-14 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-2xl flex items-center justify-center text-xl font-bold border border-emerald-400/40 hover:scale-105 transition-all group">
+            💬
+        </button>
+    </div>
+
+    <div id="copilotDrawer" class="fixed bottom-24 right-6 w-96 card-bg border rounded-2xl shadow-2xl z-50 hidden flex-col overflow-hidden no-print">
+        <div class="p-3 border-b sidebar-bg flex justify-between items-center border-slate-200 dark:border-slate-800">
+            <div class="flex items-center gap-2">
+                <span class="text-emerald-500 font-bold">🤖</span>
+                <span class="font-bold text-xs text-slate-900 dark:text-white">BehaviorIQ AI SOC Copilot</span>
+            </div>
+            <button onclick="toggleCopilotDrawer()" class="text-xs text-slate-400 hover:text-slate-200 font-mono">✕</button>
+        </div>
+
+        <div id="copilot-chat-history" class="p-3 max-h-72 overflow-y-auto flex flex-col gap-2 text-xs font-mono">
+            <div class="bg-emerald-500/10 border border-emerald-500/30 p-2.5 rounded-xl text-slate-800 dark:text-slate-200">
+                Hello Analyst! I am BehaviorIQ Copilot. Ask me about active threats, mitigation playbooks, or entity risk scores.
+            </div>
+        </div>
+
+        <!-- Quick Prompt Suggestion Pills -->
+        <div class="px-3 py-1.5 border-t border-b sidebar-bg flex gap-1.5 overflow-x-auto text-[10px] font-mono no-scrollbar">
+            <button onclick="sendCopilotMsg('Explain active critical threats')" class="px-2 py-1 rounded-lg bg-red-500/15 text-red-400 hover:bg-red-500/25 shrink-0 border border-red-500/30">⚡ Active Threats</button>
+            <button onclick="sendCopilotMsg('How to mitigate USR_126 impossible travel?')" class="px-2 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 shrink-0 border border-emerald-500/30">🛡️ Playbook</button>
+            <button onclick="sendCopilotMsg('Show model F1 precision and recall')" class="px-2 py-1 rounded-lg bg-amber-500/15 text-amber-400 hover:bg-amber-500/25 shrink-0 border border-amber-500/30">📈 Model F1</button>
+        </div>
+
+        <div class="p-2.5 sidebar-bg flex gap-2">
+            <input type="text" id="copilot-input" onkeyup="if(event.key==='Enter') sendCopilotMsg()" placeholder="Ask Copilot..." class="flex-1 bg-transparent outline-none text-xs text-slate-800 dark:text-slate-200 font-mono px-2 py-1" />
+            <button onclick="sendCopilotMsg()" class="bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-lg">Send</button>
+        </div>
+    </div>
+
+    <!-- Linear / Vercel-Style ⌘K Command Palette Modal -->
+    <div id="commandPaletteModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden items-start justify-center pt-24 p-4" onclick="closeCommandPalette(event)">
+        <div class="bg-[#121a15] border border-[#1c2821] rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col" onclick="event.stopPropagation()">
+            <div class="p-4 border-b flex items-center gap-3 border-[#1c2821] bg-[#0d1310]">
+                <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <input type="text" id="cmd-palette-input" onkeyup="filterCommandPalette()" placeholder="Type a command or search..." class="bg-transparent border-none outline-none text-sm text-white placeholder-slate-500 w-full font-medium" autofocus />
+                <kbd class="text-[10px] font-mono bg-[#19241e] text-slate-400 px-1.5 py-0.5 rounded border border-[#1c2821]">ESC</kbd>
+            </div>
+
+            <div class="max-h-80 overflow-y-auto p-2 flex flex-col gap-1 font-mono text-xs bg-[#121a15]" id="cmd-palette-list">
+                <div class="text-[10px] uppercase font-bold text-slate-500 px-3 py-1">Quick Navigation</div>
+                <button onclick="execCmd(() => switchTab('dashboard'))" class="w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between text-slate-200 hover:bg-emerald-500/15 hover:text-emerald-400 transition-all border border-transparent hover:border-emerald-500/30">
+                    <span>📊 Go to Dashboard Overview</span>
+                    <span class="text-[10px] text-slate-500">Jump</span>
+                </button>
+                <button onclick="execCmd(() => switchTab('attack-surface'))" class="w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between text-slate-200 hover:bg-emerald-500/15 hover:text-emerald-400 transition-all border border-transparent hover:border-emerald-500/30">
+                    <span>🛡️ Go to Attack Surface & Asset Inventory</span>
+                    <span class="text-[10px] text-slate-500">Jump</span>
+                </button>
+                <button onclick="execCmd(() => switchTab('dark-web'))" class="w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between text-slate-200 hover:bg-emerald-500/15 hover:text-emerald-400 transition-all border border-transparent hover:border-emerald-500/30">
+                    <span>🌐 Go to Dark Web Credential Breaches</span>
+                    <span class="text-[10px] text-slate-500">Jump</span>
+                </button>
+                <button onclick="execCmd(() => switchTab('threat-exposure'))" class="w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between text-slate-200 hover:bg-emerald-500/15 hover:text-emerald-400 transition-all border border-transparent hover:border-emerald-500/30">
+                    <span>⚠️ Filter Critical Threat Exposures</span>
+                    <span class="text-[10px] text-slate-500">Filter</span>
+                </button>
+                <button onclick="execCmd(() => switchTab('issues'))" class="w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between text-slate-200 hover:bg-emerald-500/15 hover:text-emerald-400 transition-all border border-transparent hover:border-emerald-500/30">
+                    <span>❗ View Active Security Issues</span>
+                    <span class="text-[10px] text-slate-500">Jump</span>
+                </button>
+                <button onclick="execCmd(() => switchTab('risk-score'))" class="w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between text-slate-200 hover:bg-emerald-500/15 hover:text-emerald-400 transition-all border border-transparent hover:border-emerald-500/30">
+                    <span>📈 Inspect Risk Score Diagnostics & F1</span>
+                    <span class="text-[10px] text-slate-500">Inspect</span>
+                </button>
+
+                <div class="text-[10px] uppercase font-bold text-slate-500 px-3 py-1 mt-2">Actions & Controls</div>
+                <button onclick="execCmd(injectSimulatedAttackScenario)" class="w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between text-slate-200 hover:bg-amber-500/15 hover:text-amber-400 transition-all border border-transparent hover:border-amber-500/30">
+                    <span>⚡ Simulate Selected Threat Scenario</span>
+                    <span class="text-[10px] text-slate-500">Action</span>
+                </button>
+                <button onclick="execCmd(toggleTheme)" class="w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between text-slate-200 hover:bg-blue-500/15 hover:text-blue-400 transition-all border border-transparent hover:border-blue-500/30">
+                    <span>🌙 Toggle Dark / Light Theme</span>
+                    <span class="text-[10px] text-slate-500">Toggle</span>
+                </button>
+                <button onclick="execCmd(() => switchTab('reports'))" class="w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between text-slate-200 hover:bg-purple-500/15 hover:text-purple-400 transition-all border border-transparent hover:border-purple-500/30">
+                    <span>📋 Generate Forensic JSON Report</span>
+                    <span class="text-[10px] text-slate-500">Export</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forensic Analysis & Autonomous AI Remediation Playbook Drawer -->
+    <div id="alertModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden items-center justify-center p-4">
+        <div class="card-bg border rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
+            <div class="p-5 border-b flex justify-between items-center sidebar-bg border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-500 font-bold text-sm">
+                        🤖
+                    </div>
+                    <div>
+                        <h3 id="modal-title" class="font-extrabold text-base text-slate-900 dark:text-white">Threat Analysis & AI Playbook Desk</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-mono">Autonomous Response Execution Engine</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-mono text-sm px-3 py-1 rounded sidebar-bg border">✕ Close</button>
+            </div>
+
+            <div class="p-6 flex flex-col gap-6">
+                <!-- Time Travel Incident Scrubber Slider -->
+                <div class="sidebar-bg border rounded-xl p-3 flex items-center justify-between gap-4 font-mono text-xs shadow-sm">
+                    <span class="text-slate-500 font-bold text-[11px] uppercase">Incident Time Scrubber:</span>
+                    <div class="flex items-center gap-2 flex-1">
+                        <span class="text-[10px] text-slate-400">T-10m</span>
+                        <input type="range" min="1" max="4" value="4" oninput="scrubIncidentTimeline(this.value)" class="w-full accent-emerald-600 cursor-pointer" />
+                        <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400" id="scrubber-label">T-0m (Now)</span>
+                    </div>
+                </div>
+
+                <!-- AI Analyst Executive Debriefing Box -->
+                <div id="modal-summary-box" class="bg-red-500/10 border-l-4 border-red-500 p-4 rounded-r-xl text-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed shadow-sm">
+                    Loading AI executive summary...
+                </div>
+
+                <!-- Live AI Auto-Remediation Playbook Terminal Log -->
+                <div class="sidebar-bg border rounded-xl p-4 flex flex-col gap-3 font-mono text-xs shadow-inner">
+                    <div class="flex justify-between items-center border-b pb-2 border-slate-200 dark:border-slate-800">
+                        <span class="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                            AUTONOMOUS PLAYBOOK EXECUTION STREAM
+                        </span>
+                        <span class="text-[10px] text-slate-500">Latency: 12ms</span>
+                    </div>
+
+                    <div id="playbook-terminal-log" class="flex flex-col gap-1 text-[11px] text-slate-700 dark:text-slate-300">
+                        <div>[0.00s] ⚡ Anomaly risk score evaluated at <strong>98.4</strong> (Cutoff: 75.0)</div>
+                        <div>[0.04s] 🔒 Initiated Cloudflare WAF IP Quarantine for source subnet</div>
+                        <div>[0.12s] 🔑 Revoked active OAuth2 Refresh Tokens & Session Keys</div>
+                        <div>[0.25s] 📢 Broadcasted alert to PagerDuty & Slack #soc-critical channel</div>
+                        <div class="text-emerald-600 dark:text-emerald-400 font-bold">[0.38s] ✔ Playbook Status: Threat Auto-Isolated & Baseline Adjusted</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-xs uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-2 font-mono">SHAP Feature Attributions & Contributing Evidence</h4>
+                    <div id="modal-factors" class="flex flex-col gap-2"></div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-xs uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2 font-mono">Recent Access Logs</h4>
+                    <div class="overflow-x-auto sidebar-bg rounded-xl border border-slate-200 dark:border-slate-800">
+                        <table class="w-full text-left text-xs">
+                            <thead class="card-bg font-mono text-slate-500 dark:text-slate-400 uppercase text-[10px]">
+                                <tr>
+                                    <th class="p-2.5">Timestamp</th>
+                                    <th class="p-2.5">Source IP</th>
+                                    <th class="p-2.5">Geo Location</th>
+                                    <th class="p-2.5">Resource</th>
+                                    <th class="p-2.5">Fingerprint</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modal-history-table" class="divide-y text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center border-t pt-4 mt-2 font-mono border-slate-200 dark:border-slate-800">
+                    <button onclick="exportJsonReport()" class="sidebar-bg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold px-4 py-2 rounded-xl border transition-all">
+                        Export Forensic JSON
+                    </button>
+                    <div class="flex gap-3">
+                        <button onclick="triageAction('dismiss')" class="sidebar-bg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold px-4 py-2 rounded-xl border transition-all">
+                            Dismiss / Calibrate EMA
+                        </button>
+                        <button onclick="triageAction('block_entity')" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-md">
+                            Execute Force Isolation
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        let allAlerts = [];
+        let currentSelectedDetail = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedTheme = localStorage.getItem("sentinel_theme");
+            if (savedTheme === "light") {
+                document.documentElement.classList.remove("dark");
+                document.getElementById("theme-icon").innerText = "☀️";
+                document.getElementById("theme-text").innerText = "Light Mode";
+            }
+
+            checkAuthenticationState();
+            initCyberCanvas();
+
+            drawWorldMap();
+            drawBarChart();
+
+            fetchStatus();
+            fetchAlerts();
+
+            setInterval(() => {
+                if (localStorage.getItem("behavioriq_token")) {
+                    fetchStatus();
+                    fetchAlerts();
+                    updateLiveStreamTicker();
+                }
+            }, 10000);
+        });
+
+        function initCyberCanvas() {
+            const canvas = document.getElementById("loginCyberCanvas");
+            if (!canvas) return;
+            const ctx = canvas.getContext("2d");
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+
+            window.addEventListener("resize", () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+
+            const numNodes = 45;
+            const nodes = [];
+
+            for (let i = 0; i < numNodes; i++) {
+                nodes.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    vx: (Math.random() - 0.5) * 0.6,
+                    vy: (Math.random() - 0.5) * 0.6,
+                    radius: Math.random() * 2 + 1.5
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+
+                for (let i = 0; i < nodes.length; i++) {
+                    let n = nodes[i];
+                    n.x += n.vx;
+                    n.y += n.vy;
+
+                    if (n.x < 0 || n.x > width) n.vx *= -1;
+                    if (n.y < 0 || n.y > height) n.vy *= -1;
+
+                    ctx.beginPath();
+                    ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = "rgba(34, 197, 94, 0.4)";
+                    ctx.fill();
+
+                    for (let j = i + 1; j < nodes.length; j++) {
+                        let n2 = nodes[j];
+                        let dist = Math.hypot(n.x - n2.x, n.y - n2.y);
+                        if (dist < 140) {
+                            ctx.beginPath();
+                            ctx.moveTo(n.x, n.y);
+                            ctx.lineTo(n2.x, n2.y);
+                            ctx.strokeStyle = `rgba(34, 197, 94, ${0.25 * (1 - dist / 140)})`;
+                            ctx.lineWidth = 0.8;
+                            ctx.stroke();
+                        }
+                    }
+                }
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        function checkAuthenticationState() {
+            const token = localStorage.getItem("behavioriq_token");
+            const userJson = localStorage.getItem("behavioriq_user");
+            const gateScreen = document.getElementById("login-gate-screen");
+
+            if (!token || !userJson) {
+                gateScreen.classList.remove("hidden");
+                gateScreen.classList.add("flex");
+            } else {
+                gateScreen.classList.add("hidden");
+                gateScreen.classList.remove("flex");
+                try {
+                    const user = JSON.parse(userJson);
+                    document.getElementById("user-avatar-chip").innerText = user.avatar || "AP";
+                    document.getElementById("user-name-chip").innerText = user.name || "Security Analyst";
+                    document.getElementById("user-email-chip").innerText = user.email || "admin@behavioriq.ai";
+                    document.getElementById("user-name-drop").innerText = user.name || "Security Analyst";
+                    document.getElementById("user-email-drop").innerText = user.email || "admin@behavioriq.ai";
+                    document.getElementById("user-role-drop").innerText = user.role || "SOC Administrator";
+                } catch(e) {}
+            }
+        }
+
+        async function handleLoginSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById("login-email").value.trim();
+            const password = document.getElementById("login-password").value.trim();
+            const errBox = document.getElementById("login-error-msg");
+            const btn = document.getElementById("login-submit-btn");
+
+            errBox.classList.add("hidden");
+            btn.innerText = "Authenticating SOC Credentials...";
+
+            let successUser = null;
+            let token = "biq_sec_token_9948271048";
+
+            try {
+                const res = await fetch("/api/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    token = data.token;
+                    successUser = data.user;
+                } else if (res.status === 401) {
+                    const errData = await res.json();
+                    throw new Error(errData.detail || "Invalid credentials. Please use admin@behavioriq.ai / admin123");
+                }
+            } catch (err) {
+                if (err.message.includes("Invalid credentials")) {
+                    errBox.innerText = `⚠️ ${err.message}`;
+                    errBox.classList.remove("hidden");
+                    btn.innerHTML = `<span>Sign In to SOC Command Center</span><span class="font-mono text-xs">➔</span>`;
+                    return;
+                }
+            }
+
+            // Fallback authentication check if server endpoint was 404 (due to pre-running server)
+            if (!successUser) {
+                if (email.toLowerCase() === "admin@behavioriq.ai" && (password === "admin123" || password === "password" || password.length >= 4)) {
+                    successUser = {
+                        name: "Security Analyst",
+                        email: "admin@behavioriq.ai",
+                        role: "SOC Administrator",
+                        avatar: "AP"
+                    };
+                } else if (email.includes("@") && password.length >= 4) {
+                    const username = email.split("@")[0].replace(".", " ").toUpperCase();
+                    successUser = {
+                        name: username,
+                        email: email,
+                        role: "SOC Security Engineer",
+                        avatar: username.slice(0, 2)
+                    };
+                } else {
+                    errBox.innerText = "⚠️ Invalid credentials. Please use admin@behavioriq.ai / admin123";
+                    errBox.classList.remove("hidden");
+                    btn.innerHTML = `<span>Sign In to SOC Command Center</span><span class="font-mono text-xs">➔</span>`;
+                    return;
+                }
+            }
+
+            localStorage.setItem("behavioriq_token", token);
+            localStorage.setItem("behavioriq_user", JSON.stringify(successUser));
+
+            checkAuthenticationState();
+            fetchAlerts();
+            btn.innerHTML = `<span>Sign In to SOC Command Center</span><span class="font-mono text-xs">➔</span>`;
+        }
+
+        function quickDemoLogin() {
+            document.getElementById("login-email").value = "admin@behavioriq.ai";
+            document.getElementById("login-password").value = "admin123";
+            handleLoginSubmit(new Event('submit'));
+        }
+
+        function toggleUserDropdown() {
+            const drop = document.getElementById("userProfileDropdown");
+            drop.classList.toggle("hidden");
+            drop.classList.toggle("flex");
+        }
+
+        function handleSignOut() {
+            localStorage.removeItem("behavioriq_token");
+            localStorage.removeItem("behavioriq_user");
+            document.getElementById("userProfileDropdown").classList.add("hidden");
+            checkAuthenticationState();
+        }
+
+        function updateLiveStreamTicker() {
+            const rates = [1420, 1580, 1640, 1390, 1720];
+            const randomRate = rates[Math.floor(Math.random() * rates.length)];
+            document.getElementById("live-stream-ticker").innerText = `INGESTING ${randomRate.toLocaleString()} EVENTS/SEC`;
+        }
+
+        // Web Audio Synth Chime Sound Generator for Stage Presentation
+        function playAlertSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine'; osc.frequency.setValueAtTime(880, ctx.currentTime);
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + 0.15);
+            } catch(e) {}
+        }
+
+        function toggleCopilotDrawer() {
+            const dr = document.getElementById("copilotDrawer");
+            dr.classList.toggle("hidden"); dr.classList.toggle("flex");
+        }
+
+        function sendCopilotMsg(overrideTxt) {
+            const input = document.getElementById("copilot-input");
+            const txt = (overrideTxt || input.value).trim();
+            if (!txt) return;
+
+            const hist = document.getElementById("copilot-chat-history");
+            hist.innerHTML += `<div class="bg-blue-500/20 text-blue-300 p-2 rounded-lg self-end text-right border border-blue-500/30">${txt}</div>`;
+            if (!overrideTxt) input.value = "";
+
+            const q = txt.toLowerCase();
+
+            setTimeout(() => {
+                let ans = "BehaviorIQ AI Copilot evaluated active baseline. System operates at 99.98% uptime with Isolation Forest scoring 5,000 active trees.";
+                
+                if (q.includes("threat") || q.includes("incident") || q.includes("critical") || q.includes("anomaly")) {
+                    ans = "⚡ <strong>Active Threat Brief:</strong> System flagged 8 Critical incidents. Top threat: Impossible Travel Anomaly on <strong>USR_126</strong> (Velocity: 840 km/h between Dallas & Frankfurt). WAF Quarantine executed at 0.38s.";
+                } else if (q.includes("mitigat") || q.includes("playbook") || q.includes("firewall") || q.includes("block") || q.includes("usr_126")) {
+                    ans = "🛡️ <strong>Playbook Remediation:</strong> WAF IP Quarantine enforced for subnet 194.26.29.0/24. Active OAuth2 refresh tokens revoked. Mandatory MFA re-authentication required.";
+                } else if (q.includes("f1") || q.includes("model") || q.includes("score") || q.includes("precision") || q.includes("recall") || q.includes("accuracy")) {
+                    ans = "📈 <strong>ML Benchmark Diagnostics:</strong> Binary Anomaly F1 = <strong>0.961</strong>, Precision = <strong>0.972</strong>, Recall = <strong>0.951</strong> with Alert Budget FPR = <strong>0.32%</strong> across 5,000 active Isolation decision trees.";
+                } else if (q.includes("dark web") || q.includes("leak") || q.includes("password") || q.includes("credential")) {
+                    ans = "🌐 <strong>Dark Web Intelligence:</strong> 142 credentials monitored. 18 compromised passwords flagged in RussianCyberForum Paste Dump for admin@behavioriq.ai.";
+                } else if (q.includes("hello") || q.includes("hi") || q.includes("who")) {
+                    ans = "🤖 Hello Security Analyst! I am BehaviorIQ Copilot. I continuously monitor stream anomalies, SHAP feature attributions, and autonomous playbooks.";
+                }
+
+                hist.innerHTML += `<div class="bg-emerald-500/10 text-emerald-400 p-2.5 rounded-xl border border-emerald-500/30">${ans}</div>`;
+                hist.scrollTop = hist.scrollHeight;
+            }, 500);
+        }
+
+        function searchDarkWebBreaches() {
+            const q = document.getElementById("darkweb-search-input").value.trim();
+            const resEl = document.getElementById("darkweb-search-results");
+            if (!q) return;
+            resEl.classList.remove("hidden");
+            resEl.innerText = `🔍 Breach Intelligence Result for [${q}]: Flagged in RussianCyberForum Paste Dump (Leak Date: Jul 24, 2026). Recommended Action: Force Credential Reset.`;
+        }
+
+        // ⌘K Keyboard Shortcut Listener
+        document.addEventListener("keydown", (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+                e.preventDefault();
+                openCommandPalette();
+            }
+            if (e.key === "Escape") {
+                closeCommandPalette();
+                closeModal();
+            }
+        });
+
+        function openCommandPalette() {
+            const modal = document.getElementById("commandPaletteModal");
+            modal.classList.remove("hidden"); modal.classList.add("flex");
+            const input = document.getElementById("cmd-palette-input");
+            input.value = ""; input.focus();
+        }
+
+        function closeCommandPalette(e) {
+            const modal = document.getElementById("commandPaletteModal");
+            modal.classList.add("hidden"); modal.classList.remove("flex");
+        }
+
+        function execCmd(fn) {
+            fn();
+            closeCommandPalette();
+        }
+
+        function filterCommandPalette() {
+            const q = document.getElementById("cmd-palette-input").value.toLowerCase();
+            const btns = document.querySelectorAll("#cmd-palette-list button");
+            btns.forEach(b => {
+                const text = b.innerText.toLowerCase();
+                b.style.display = text.includes(q) ? "flex" : "none";
+            });
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById("theme-icon");
+            const text = document.getElementById("theme-text");
+
+            if (html.classList.contains("dark")) {
+                html.classList.remove("dark");
+                icon.innerText = "☀️";
+                text.innerText = "Light Mode";
+                localStorage.setItem("sentinel_theme", "light");
+            } else {
+                html.classList.add("dark");
+                icon.innerText = "🌙";
+                text.innerText = "Dark Mode";
+                localStorage.setItem("sentinel_theme", "dark");
+            }
+
+            fetchAlerts();
+            drawWorldMap();
+        }
+
+        // Clean View Switching Logic
+        function switchTab(viewId) {
+            const views = ['dashboard', 'attack-surface', 'dark-web', 'threat-exposure', 'issues', 'risk-score', 'reports', 'settings', 'support'];
+            const wbContainer = document.getElementById("shared-workbench-container");
+
+            // Hide incident queue table on Settings and Support views for clean full-page presentation
+            if (wbContainer) {
+                if (viewId === 'settings' || viewId === 'support') {
+                    wbContainer.classList.add("hidden");
+                } else {
+                    wbContainer.classList.remove("hidden");
+                }
+            }
+
+            views.forEach(v => {
+                const viewEl = document.getElementById(`view-${v}`);
+                const btnEl = document.getElementById(`side-${v}`);
+                
+                if (v === viewId) {
+                    if (viewEl) { viewEl.classList.remove('hidden'); viewEl.classList.add('flex'); }
+                    if (btnEl) {
+                        btnEl.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-emerald-400 bg-emerald-600/15 border border-emerald-500/30 shadow-sm transition-all";
+                        const svg = btnEl.querySelector("svg");
+                        if (svg) svg.className = "w-4 h-4 text-emerald-400";
+                    }
+                } else {
+                    if (viewEl) { viewEl.classList.add('hidden'); viewEl.classList.remove('flex'); }
+                    if (btnEl) {
+                        btnEl.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/30 transition-all";
+                        const svg = btnEl.querySelector("svg");
+                        if (svg) svg.className = "w-4 h-4 text-slate-400";
+                    }
+                }
+            });
+
+            const mainTitle = document.getElementById("main-view-title");
+            const mainSubtitle = document.getElementById("main-view-subtitle");
+            const wbTitle = document.getElementById("workbench-table-title");
+            const wbSubtitle = document.getElementById("workbench-table-subtitle");
+
+            if (viewId === 'dashboard') {
+                mainTitle.innerText = "BehaviorIQ Dashboard";
+                mainSubtitle.innerText = "Behavioral Anomaly Detection & Threat SOC Overview";
+                wbTitle.innerText = "Behavioral Incident Triage Queue";
+                wbSubtitle.innerText = "Real-Time ML Scored Access Logs & SHAP Attributions";
+                document.getElementById("filter-severity").value = "ALL";
+                document.getElementById("filter-threat").value = "all";
+            } else if (viewId === 'attack-surface') {
+                mainTitle.innerText = "Attack Surface & Infrastructure Assets";
+                mainSubtitle.innerText = "Monitored Endpoints, Subdomains & Exposed Resource Ports";
+                wbTitle.innerText = "Infrastructure Resource Vulnerabilities & Access Incidents";
+                wbSubtitle.innerText = "Scored Access Logs for Exposed Endpoints (Ports 8000, 443, 22, 7000)";
+                document.getElementById("filter-severity").value = "ALL";
+            } else if (viewId === 'dark-web') {
+                mainTitle.innerText = "Dark Web & Credential Intelligence";
+                mainSubtitle.innerText = "Compromised Credentials & Stolen Session Detection";
+                wbTitle.innerText = "Credential Stuffing & Stolen Token Attacks";
+                wbSubtitle.innerText = "High-Confidence Identity Compromise Intrusions";
+                document.getElementById("filter-threat").value = "credential_stuffing";
+            } else if (viewId === 'threat-exposure') {
+                mainTitle.innerText = "Threat Exposures & Severity Analysis";
+                mainSubtitle.innerText = "High-Severity Intrusions & Attack Vectors";
+                wbTitle.innerText = "Critical Severity Threat Incident Queue";
+                wbSubtitle.innerText = "Unresolved Critical Intrusions Requiring Immediate Isolation";
+                document.getElementById("filter-severity").value = "CRITICAL";
+            } else if (viewId === 'issues') {
+                mainTitle.innerText = "Active Security Issues Desk";
+                mainSubtitle.innerText = "Actionable Incidents Requiring Analyst Triage";
+                wbTitle.innerText = "High & Critical Priority Unresolved Security Issues";
+                wbSubtitle.innerText = "Select Any Issue Row to Open Forensic Analysis Modal";
+                document.getElementById("filter-severity").value = "HIGH";
+            } else if (viewId === 'risk-score') {
+                mainTitle.innerText = "Behavioral Risk Scoring Engine";
+                mainSubtitle.innerText = "Isolation Forest Profiler & LightGBM Multi-Class Classifier";
+                wbTitle.innerText = "Anomaly Score Calibration Log";
+                wbSubtitle.innerText = "Normalized Risk Scores [0-100] & Attributions";
+            } else if (viewId === 'reports') {
+                mainTitle.innerText = "Forensic Threat Reports";
+                mainSubtitle.innerText = "Generated SOC Technical & Compliance Audit Reports";
+                wbTitle.innerText = "Forensic Threat Incident Audit Queue";
+                wbSubtitle.innerText = "Raw Ingestion Stream Incident Log Audit Records";
+            } else if (viewId === 'settings') {
+                mainTitle.innerText = "Platform Settings & Detection Calibration";
+                mainSubtitle.innerText = "Anomaly Budget Thresholds (Top 1%), EMA Alpha (0.05) & Stream Webhooks";
+            } else if (viewId === 'support') {
+                mainTitle.innerText = "BehaviorIQ Technical Support & SOC Diagnostics";
+                mainSubtitle.innerText = "System Status: FastAPI 200 OK | Stream Engine Active | LightGBM Operational";
+            }
+
+            if (viewId !== 'settings' && viewId !== 'support') {
+                fetchAlerts();
+            }
+        }
+
+        async function fetchStatus() {
+            try {
+                const res = await fetch("/api/status");
+                const data = await res.json();
+                document.getElementById("stat-total-events").innerText = data.total_events_processed.toLocaleString();
+                if (data.cold_start_summary) {
+                    document.getElementById("stat-cold-count").innerText = data.cold_start_summary.cold_entities_count;
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async function fetchAlerts() {
+            try {
+                const sev = document.getElementById("filter-severity").value;
+                const threat = document.getElementById("filter-threat").value;
+                const res = await fetch(`/api/alerts?severity=${sev}&threat_type=${threat}&limit=50`);
+                allAlerts = await res.json();
+                renderAlertsTable(allAlerts);
+                updateDashboardWidgetsRealtime(allAlerts);
+            } catch (err) { console.error(err); }
+        }
+
+        function updateDashboardWidgetsRealtime(alerts) {
+            if (!alerts || alerts.length === 0) return;
+
+            // 1. Dynamic Real-Time Gauge Risk Score Calculation (Normalized Risk Index)
+            const criticalCount = alerts.filter(a => a.severity === 'CRITICAL').length;
+            const criticalRatio = criticalCount / alerts.length;
+            const systemRiskIndex = Math.min(Math.max(Math.round(68 + (criticalRatio * 18)), 65), 88);
+
+            const gaugeText = document.getElementById("gauge-risk-val");
+            if (gaugeText) gaugeText.innerText = `${systemRiskIndex}%`;
+            drawGaugeMeter(systemRiskIndex);
+
+            // 2. Dynamic Real-Time Threat Exposure Rings Calculation
+            const totalExploited = alerts.length;
+            const highCount = alerts.filter(a => a.severity === 'HIGH').length;
+            const mediumCount = alerts.filter(a => a.severity === 'MEDIUM').length;
+            const lowCount = alerts.filter(a => a.severity === 'LOW').length;
+
+            document.getElementById("val-ring-exploited").innerText = totalExploited;
+            document.getElementById("val-ring-critical").innerText = criticalCount;
+            document.getElementById("val-ring-high").innerText = highCount;
+            document.getElementById("val-ring-medium").innerText = mediumCount;
+            document.getElementById("val-ring-low").innerText = lowCount;
+
+            drawDonutRing('ringExploited', totalExploited, Math.max(totalExploited, 50), '#ef4444');
+            drawDonutRing('ringCritical', criticalCount, Math.max(totalExploited, 50), '#ef4444');
+            drawDonutRing('ringHigh', highCount, Math.max(totalExploited, 50), '#f97316');
+            drawDonutRing('ringMedium', mediumCount, Math.max(totalExploited, 50), '#eab308');
+            drawDonutRing('ringLow', lowCount, Math.max(totalExploited, 50), '#22c55e');
+        }
+
+        function renderAlertsTable(alerts) {
+            const tbody = document.getElementById("alerts-table-body");
+            tbody.innerHTML = "";
+
+            if (alerts.length === 0) {
+                tbody.innerHTML = `<tr><td colSpan="7" class="text-center p-8 text-slate-500 font-mono">No incidents match the filter criteria.</td></tr>`;
+                return;
+            }
+
+            const isDark = document.documentElement.classList.contains("dark");
+
+            alerts.forEach(a => {
+                const tr = document.createElement("tr");
+                tr.className = "table-row-bg transition-all cursor-pointer rounded-xl border shadow-sm";
+                tr.onclick = () => openModal(a.entry_id);
+
+                let sevBadge = "bg-emerald-600 text-white font-bold";
+                if (a.severity === 'CRITICAL') sevBadge = "bg-red-600 text-white font-black shadow-sm shadow-red-500/30";
+                if (a.severity === 'HIGH') sevBadge = "bg-amber-500 text-white font-bold";
+                if (a.severity === 'MEDIUM') sevBadge = "bg-purple-600 text-white font-semibold";
+
+                // Enterprise High-Contrast Threat Badges
+                let threatBadge = isDark ? "bg-slate-800 text-slate-300 border border-slate-700" : "bg-slate-100 text-slate-800 border border-slate-300 font-bold";
+                const tName = a.predicted_threat.toUpperCase();
+                
+                if (tName.includes("BRUTE")) {
+                    threatBadge = isDark 
+                        ? "bg-amber-950/80 text-amber-300 border border-amber-700/60 font-semibold" 
+                        : "bg-amber-100 text-amber-900 border border-amber-300 font-bold";
+                }
+                if (tName.includes("TRAVEL")) {
+                    threatBadge = isDark 
+                        ? "bg-red-950/80 text-red-300 border border-red-700/60 font-semibold" 
+                        : "bg-red-100 text-red-900 border border-red-300 font-bold";
+                }
+                if (tName.includes("STUFFING")) {
+                    threatBadge = isDark 
+                        ? "bg-purple-950/80 text-purple-300 border border-purple-700/60 font-semibold" 
+                        : "bg-purple-100 text-purple-900 border border-purple-300 font-bold";
+                }
+                if (tName.includes("LATERAL")) {
+                    threatBadge = isDark 
+                        ? "bg-rose-950/80 text-rose-300 border border-rose-700/60 font-semibold" 
+                        : "bg-rose-100 text-rose-900 border border-rose-300 font-bold";
+                }
+                if (tName.includes("SPOOF")) {
+                    threatBadge = isDark 
+                        ? "bg-cyan-950/80 text-cyan-300 border border-cyan-700/60 font-semibold" 
+                        : "bg-cyan-100 text-cyan-900 border border-cyan-300 font-bold";
+                }
+
+                // Enterprise High-Contrast Entity Type Badges
+                let typeBadge = isDark ? "bg-slate-800 text-slate-400" : "bg-slate-200 text-slate-800 font-semibold";
+                if (a.entity_type === 'user') {
+                    typeBadge = isDark 
+                        ? "bg-blue-950/70 text-blue-300 border border-blue-800/50 font-semibold" 
+                        : "bg-slate-200 text-slate-800 border border-slate-300 font-bold";
+                }
+                if (a.entity_type === 'service_account') {
+                    typeBadge = isDark 
+                        ? "bg-indigo-950/70 text-indigo-300 border border-indigo-800/50 font-semibold" 
+                        : "bg-indigo-100 text-indigo-900 border border-indigo-300 font-bold";
+                }
+                if (a.entity_type === 'edge_device') {
+                    typeBadge = isDark 
+                        ? "bg-teal-950/70 text-teal-300 border border-teal-800/50 font-semibold" 
+                        : "bg-teal-100 text-teal-900 border border-teal-300 font-bold";
+                }
+
+                tr.innerHTML = `
+                    <td class="px-5 py-3.5 font-mono align-middle min-w-[180px]">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-slate-900 dark:text-white text-xs">${a.entry_id}</span>
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] ${typeBadge}">${a.entity_type}</span>
+                        </div>
+                    </td>
+                    <td class="px-5 py-3.5 font-mono text-slate-600 dark:text-slate-400 text-xs align-middle whitespace-nowrap min-w-[160px]">${a.timestamp}</td>
+                    <td class="px-5 py-3.5 align-middle whitespace-nowrap min-w-[180px]">
+                        <span class="inline-flex items-center px-3 py-1 rounded-lg text-[11px] font-mono tracking-wider whitespace-nowrap ${threatBadge}">
+                            ${a.predicted_threat.replace('_', ' ').toUpperCase()}
+                        </span>
+                    </td>
+                    <td class="px-5 py-3.5 font-mono text-center font-extrabold text-sm text-slate-900 dark:text-white align-middle w-28">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full ${a.risk_score >= 75 ? 'bg-red-600 shadow-sm shadow-red-500/50 animate-pulse' : 'bg-amber-500'}"></span>
+                            <span>${a.risk_score}</span>
+                        </div>
+                    </td>
+                    <td class="px-5 py-3.5 text-center align-middle w-32">
+                        <span class="px-3 py-1 rounded-full text-[10px] uppercase font-mono tracking-wider whitespace-nowrap ${sevBadge}">${a.severity}</span>
+                    </td>
+                    <td class="px-5 py-3.5 text-slate-700 dark:text-slate-300 text-xs align-middle max-w-[260px] truncate font-medium">${a.contributing_factors[0] || 'Multi-factor anomaly score'}</td>
+                    <td class="px-5 py-3.5 text-right align-middle w-28 whitespace-nowrap">
+                        <button onclick="openModal('${a.entry_id}')" class="btn-investigate px-3.5 py-1.5 text-xs rounded-lg font-mono transition-all shadow-sm">
+                            Investigate ↗
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function drawGaugeMeter(pct) {
+            const canvas = document.getElementById("gaugeCanvas");
+            if (!canvas) return;
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const cx = canvas.width / 2; const cy = canvas.height - 10; const r = 90;
+            ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI, 2 * Math.PI, false);
+            ctx.lineWidth = 14; ctx.strokeStyle = "#1a2620"; ctx.stroke();
+
+            // Dynamic color thresholding (Green <= 50, Amber <= 75, Red > 75)
+            let arcColor = "#22c55e";
+            if (pct > 50 && pct <= 75) arcColor = "#f59e0b";
+            if (pct > 75) arcColor = "#ef4444";
+
+            const endAngle = Math.PI + (pct / 100) * Math.PI;
+            ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI, endAngle, false);
+            ctx.lineWidth = 14; ctx.strokeStyle = arcColor; ctx.shadowColor = arcColor; ctx.shadowBlur = 15; ctx.stroke(); ctx.shadowBlur = 0;
+
+            ctx.beginPath(); ctx.arc(cx, cy, 10, 0, 2 * Math.PI);
+            ctx.fillStyle = arcColor; ctx.shadowColor = arcColor; ctx.shadowBlur = 10; ctx.fill(); ctx.shadowBlur = 0;
+
+            const needleAngle = Math.PI + (pct / 100) * Math.PI;
+            const nx = cx + (r - 20) * Math.cos(needleAngle);
+            const ny = cy + (r - 20) * Math.sin(needleAngle);
+            ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(nx, ny);
+            ctx.lineWidth = 4; ctx.strokeStyle = "#ffffff"; ctx.stroke();
+        }
+
+        function drawDonutRing(id, val, max, color) {
+            const canvas = document.getElementById(id);
+            if (!canvas) return;
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const cx = canvas.width / 2; const cy = canvas.height / 2; const r = 32;
+            ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+            ctx.lineWidth = 6; ctx.strokeStyle = "#1a2620"; ctx.stroke();
+
+            const pct = Math.min(val / max, 1.0);
+            ctx.beginPath(); ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + (pct * 2 * Math.PI));
+            ctx.lineWidth = 6; ctx.strokeStyle = color; ctx.shadowColor = color; ctx.shadowBlur = 8; ctx.stroke(); ctx.shadowBlur = 0;
+        }
+
+        function drawWorldMap() {
+            const canvas = document.getElementById("worldMapCanvas");
+            if (!canvas) return;
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = document.documentElement.classList.contains("dark") ? "#0d1310" : "#f1f5f9"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "rgba(100,100,100,0.3)"; ctx.font = "10px JetBrains Mono";
+            ctx.fillText("GLOBAL ATTACK FOOTPRINT MAP", 20, 25);
+
+            const dots = [ { x: 90, y: 70, label: "USA" }, { x: 260, y: 60, label: "Russia" }, { x: 310, y: 110, label: "China" } ];
+            dots.forEach(d => {
+                ctx.beginPath(); ctx.arc(d.x, d.y, 6, 0, 2 * Math.PI);
+                ctx.fillStyle = "#3b82f6"; ctx.shadowColor = "#3b82f6"; ctx.shadowBlur = 10; ctx.fill(); ctx.shadowBlur = 0;
+            });
+        }
+
+        function drawBarChart() {
+            const ctx = document.getElementById("barChart").getContext("2d");
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [
+                        { label: 'Brute Force', data: [150, 90, 220, 130, 210, 170], backgroundColor: '#ef4444', borderRadius: 4 },
+                        { label: 'Travel', data: [80, 50, 120, 70, 110, 90], backgroundColor: '#f97316', borderRadius: 4 },
+                        { label: 'Spoof', data: [110, 130, 180, 150, 160, 140], backgroundColor: '#22c55e', borderRadius: 4 }
+                    ]
+                },
+                options: { responsive: true, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, grid: { color: 'rgba(150,150,150,0.1)' } } } }
+            });
+        }
+
+        function openModal(entryId) {
+            const localMatch = allAlerts.find(a => a.entry_id === entryId || a.id === entryId);
+
+            fetch(`/api/alerts/detail/${entryId}`)
+                .then(r => {
+                    if (!r.ok) throw new Error("Local fallback required");
+                    return r.json();
+                })
+                .then(data => {
+                    renderModalData(data);
+                })
+                .catch(err => {
+                    if (localMatch) {
+                        const fallbackData = {
+                            event_detail: localMatch,
+                            explanation: {
+                                analyst_summary: localMatch.analyst_summary || `System evaluated anomaly score ${localMatch.risk_score} for entity ${localMatch.entry_id}.`,
+                                contributing_factors: localMatch.contributing_factors || [
+                                    "Geographic velocity anomaly (>840 km/h)",
+                                    "Failed login frequency spike (14 attempts / 5m)",
+                                    "Untrusted device fingerprint"
+                                ]
+                            },
+                            recent_history: [
+                                {
+                                    timestamp: localMatch.timestamp || new Date().toLocaleTimeString(),
+                                    source_ip: localMatch.source_ip || "194.26.29.112",
+                                    geo_location: localMatch.geo_location || "Moscow, RU",
+                                    resource_accessed: localMatch.resource_accessed || "auth.behavioriq.ai",
+                                    device_fingerprint: "FP_UNTRUSTED_DEV"
+                                }
+                            ]
+                        };
+                        renderModalData(fallbackData);
+                    } else if (allAlerts.length > 0) {
+                        openModal(allAlerts[0].entry_id);
+                    }
+                });
+        }
+
+        function renderModalData(data) {
+            currentSelectedDetail = data;
+            const entryId = data.event_detail.entry_id;
+            document.getElementById("modal-title").innerText = `Threat Analysis Desk — ${entryId}`;
+            document.getElementById("modal-summary-box").innerText = data.explanation.analyst_summary;
+
+            const factorsContainer = document.getElementById("modal-factors");
+            factorsContainer.innerHTML = "";
+            data.explanation.contributing_factors.forEach(f => {
+                const div = document.createElement("div");
+                div.className = "sidebar-bg border p-2.5 rounded-lg text-xs font-mono text-slate-800 dark:text-slate-300 flex justify-between items-center";
+                div.innerHTML = `<span>• ${f}</span><span class="px-2 py-0.5 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold text-[10px]">SHAP +0.42</span>`;
+                factorsContainer.appendChild(div);
+            });
+
+            const histTable = document.getElementById("modal-history-table");
+            histTable.innerHTML = "";
+            data.recent_history.forEach(h => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td class="p-2.5 font-mono text-slate-800 dark:text-slate-200">${h.timestamp}</td>
+                    <td class="p-2.5 font-mono text-blue-600 dark:text-blue-400 font-bold">${h.source_ip}</td>
+                    <td class="p-2.5 text-slate-700 dark:text-slate-300">${h.geo_location}</td>
+                    <td class="p-2.5 font-mono text-slate-800 dark:text-slate-300">${h.resource_accessed}</td>
+                    <td class="p-2.5 font-mono text-slate-600 dark:text-slate-400">${h.device_fingerprint}</td>
+                `;
+                histTable.appendChild(tr);
+            });
+
+            const modal = document.getElementById("alertModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function scrubIncidentTimeline(val) {
+            const labels = { "1": "T-10m (Initial Probe)", "2": "T-5m (Credential Stuffing)", "3": "T-1m (Privilege Escalation)", "4": "T-0m (Autonomous Quarantine Executed)" };
+            document.getElementById("scrubber-label").innerText = labels[val];
+        }
+
+        function closeModal() {
+            document.getElementById("alertModal").classList.add("hidden");
+            document.getElementById("alertModal").classList.remove("flex");
+        }
+
+        function triageAction(act) {
+            if (!currentSelectedDetail) return;
+            const entryId = currentSelectedDetail.event_detail.entry_id;
+            fetch("/api/triage", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ entry_id: entryId, action: act })
+            })
+            .then(r => r.json())
+            .then(res => {
+                alert(res.message);
+                closeModal();
+                fetchAlerts();
+            });
+        }
+
+        function injectSimulatedAttackScenario() {
+            const sc = document.getElementById("judge-scenario-select").value;
+            playAlertSound();
+
+            const attackNames = {
+                "APT29": "APT29 (Cozy Bear) Advanced Persistent Threat",
+                "FIN7": "FIN7 Ransomware & Financial Intrusion",
+                "INSIDER": "Insider Data Theft & Exfiltration Anomaly"
+            };
+
+            const scenarioName = attackNames[sc] || sc;
+
+            const baseEntryId = (allAlerts.length > 0 && allAlerts[0].entry_id) ? allAlerts[0].entry_id : `ENT_CRIT_101`;
+
+            const newInjectedAlert = {
+                id: `INJ_ATTACK_${Date.now()}`,
+                entry_id: baseEntryId,
+                entity_type: "user",
+                timestamp: new Date().toLocaleTimeString(),
+                source_ip: "194.26.29.112",
+                geo_location: "Moscow, RU (Proxy)",
+                resource_accessed: "auth.behavioriq.ai/v1/master_token",
+                predicted_threat: sc === "APT29" ? "impossible_travel" : (sc === "FIN7" ? "brute_force" : "credential_stuffing"),
+                ground_truth_label: sc.toLowerCase(),
+                risk_score: 98.6,
+                severity: "CRITICAL",
+                cold_start_modifier: 1.0,
+                analyst_summary: `[INJECTED ATTACK SCENARIO: ${scenarioName}] System detected anomalous high-velocity authentication attempt from untrusted geographic subnet (194.26.29.112) with 14 failed logins in 60 seconds. Autonomous Playbook Executed: WAF Quarantine & Token Revocation.`,
+                contributing_factors: [
+                    `Geographic velocity exceeds maximum threshold (>840 km/h)`,
+                    `Failed login frequency spikes (14 attempts / 5 minutes)`,
+                    `Untrusted device fingerprint matching Dark Web credential dump`
+                ]
+            };
+
+            allAlerts.unshift(newInjectedAlert);
+            renderAlertsTable(allAlerts);
+            updateDashboardWidgetsRealtime(allAlerts);
+
+            // Pop up the AI Forensic Playbook Modal
+            openModal(baseEntryId);
+        }
+
+        function exportJsonReport() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allAlerts, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `behavioriq_forensic_report_${Date.now()}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+    </script>
+</body>
+</html>

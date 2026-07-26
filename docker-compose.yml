@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # BehaviorIQ Core Autonomous AI Engine
+  behavioriq-api:
+    build: .
+    container_name: behavioriq_soc_engine
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - REDIS_HOST=redis-feature-store
+      - REDIS_PORT=6379
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      - redis-feature-store
+      - kafka
+    restart: always
+
+  # Redis In-Memory Feature Store Cache (<0.2ms Latency)
+  redis-feature-store:
+    image: redis:7-alpine
+    container_name: behavioriq_redis_cache
+    ports:
+      - "6379:6379"
+    restart: always
+
+  # Zookeeper Coordination Service for Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: behavioriq_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  # Apache Kafka Distributed Event Streaming Broker (1M+ Events/sec)
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: behavioriq_kafka_broker
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1

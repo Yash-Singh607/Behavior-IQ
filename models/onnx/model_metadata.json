@@ -1,0 +1,6 @@
+{
+  "profiler": "IsolationForest_v4.2.onnx",
+  "classifier": "LightGBM_MultiClass_v4.2.onnx",
+  "feature_dim": 8,
+  "status": "READY_FOR_TRITON"
+}
