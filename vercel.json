@@ -9,7 +9,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "https://behavioriq-backend.onrender.com/api/$1"
+      "dest": "https://behavior-iq.onrender.com/api/$1"
     },
     {
       "src": "/(.*)",
