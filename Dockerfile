@@ -24,5 +24,5 @@ COPY . .
 # Expose port
 EXPOSE 8000
 
-# Run with Gunicorn multi-worker setup in production
-CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "app.backend:app"]
+# Run lightweight single worker for 512MB memory tier
+CMD ["sh", "-c", "uvicorn app.backend:app --host 0.0.0.0 --port ${PORT:-8000}"]
